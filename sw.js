@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kumon-diario-v7'; // <--- Incrementado de v6 para v7
+const CACHE_NAME = 'kumon-diario-v8'; // <--- ATUALIZADO PARA v8 (FORÇA ATUALIZAÇÃO)
 const urlsToCache = [
     './',
     './index.html',
@@ -10,6 +10,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Força o novo SW a assumir imediatamente
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
         return cache.addAll(urlsToCache);
@@ -32,11 +33,10 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            // Deleta caches antigos (v6)
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Controla as páginas imediatamente
   );
 });
