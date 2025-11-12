@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kumon-diario-v11'; // <--- ATUALIZADO PARA v11 (CRÍTICO)
+const CACHE_NAME = 'kumon-diario-v12'; // <--- ATUALIZADO PARA v12 (CRÍTICO)
 const urlsToCache = [
     './',
     './index.html',
@@ -35,7 +35,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName); // Deleta v10 e anteriores
+            return caches.delete(cacheName); // Deleta v11 e anteriores
           }
         })
       );
