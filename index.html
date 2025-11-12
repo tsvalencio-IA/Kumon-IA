@@ -10,6 +10,36 @@
     <meta name="theme-color" content="#0078c1">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Estilos inline para o Dashboard Avançado -->
+    <style>
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #f8f9fa;
+            border: 1px solid #d1e9f6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .kpi-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--kumon-blue);
+            display: block;
+        }
+        .kpi-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
 </head>
 <body id="app-page">
     <div id="login-screen" class="login-container">
@@ -141,20 +171,54 @@
         </footer>
     </div>
 
+    <!-- Modal de Dashboard (ATUALIZADO) -->
     <div id="dashboardModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 1000px;">
+        <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
-                <h2>📊 Relatório Gerencial da Unidade</h2>
+                <h2>📊 Cérebro da Unidade</h2>
                 <button id="closeDashboardBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="grid-2-col">
-                    <div class="section-box">
-                        <h3>📈 Distribuição por Estágio (Geral)</h3>
-                        <canvas id="stagesChart"></canvas>
+                
+                <!-- KPI Cards -->
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-total-students">0</span>
+                        <span class="kpi-label">Alunos Ativos</span>
                     </div>
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-total-subjects">0</span>
+                        <span class="kpi-label">Matrículas Totais</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-multi-subject">0</span>
+                        <span class="kpi-label">Alunos Multi-Matérias</span>
+                    </div>
+                    <div class="kpi-card" style="border-color: var(--kumon-red);">
+                        <span class="kpi-number" id="kpi-risk-count" style="color: var(--kumon-red);">0</span>
+                        <span class="kpi-label">Em Atenção</span>
+                    </div>
+                </div>
+
+                <div class="grid-2-col">
+                    <!-- Gráfico 1: Distribuição Detalhada -->
+                    <div class="section-box" style="grid-column: span 2;">
+                        <h3>📈 Distribuição de Estágios por Disciplina</h3>
+                        <div style="height: 300px;">
+                            <canvas id="stagesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" style="margin-top: 20px;">
+                    <!-- Gráfico 2: Market Share -->
                     <div class="section-box">
-                        <h3>🌡️ Termômetro da Unidade (IA)</h3>
+                        <h3>🍰 Distribuição de Matrículas</h3>
+                        <canvas id="subjectsChart"></canvas>
+                    </div>
+                    <!-- Gráfico 3: Termômetro -->
+                    <div class="section-box">
+                        <h3>🌡️ Termômetro Emocional (IA)</h3>
                         <canvas id="moodChart"></canvas>
                     </div>
                 </div>
@@ -162,12 +226,10 @@
                 <div class="grid-2-col" style="margin-top: 20px;">
                     <div class="section-box" style="border-left: 5px solid var(--kumon-red);">
                         <h3 style="color: var(--kumon-red);">⚠️ Alunos em Atenção/Risco</h3>
-                        <p class="text-sm text-gray-500 mb-2">Baseado nas últimas análises da IA.</p>
                         <ul id="riskList" style="list-style: none; padding: 0;"></ul>
                     </div>
                     <div class="section-box" style="border-left: 5px solid var(--success);">
-                        <h3 style="color: var(--success);">⭐ Alunos Motivados/Destaques</h3>
-                        <p class="text-sm text-gray-500 mb-2">Baseado nas últimas análises da IA.</p>
+                        <h3 style="color: var(--success);">⭐ Alunos Destaque</h3>
                         <ul id="starList" style="list-style: none; padding: 0;"></ul>
                     </div>
                 </div>
@@ -175,6 +237,7 @@
         </div>
     </div>
 
+    <!-- Modal de Aluno (Inalterado) -->
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -222,7 +285,6 @@
                         <button class="tab-btn" data-tab="analysis">🤖 Análise IA</button>
                     </div>
 
-                    <!-- ABA PROGRAMAÇÃO -->
                     <div id="tab-programming" class="tab-content active">
                         <h3>📅 Programação de Material</h3>
                         <form id="programmingForm" class="inline-form">
@@ -231,7 +293,6 @@
                                     <label for="programmingDate">Data</label>
                                     <input type="date" id="programmingDate" required>
                                 </div>
-                                <!-- NOVO CAMPO: DISCIPLINA -->
                                 <div class="form-section">
                                     <label for="programmingSubject">Disciplina</label>
                                     <select id="programmingSubject" required>
@@ -246,8 +307,8 @@
                                 </div>
                             </div>
                             <div class="form-section">
-                                <label for="programmingNotes">Observações (Foco do estudo)</label>
-                                <textarea id="programmingNotes" rows="2" placeholder="Ex: Atenção nas frações"></textarea>
+                                <label for="programmingNotes">Observações</label>
+                                <textarea id="programmingNotes" rows="2" placeholder="Ex: Foco em operações básicas"></textarea>
                             </div>
                             <button type="submit" class="btn">Adicionar Programação</button>
                         </form>
@@ -265,7 +326,6 @@
                         </div>
                     </div>
 
-                    <!-- ABA BOLETINS -->
                     <div id="tab-reports" class="tab-content">
                         <h3>📊 Boletins Escolares</h3>
                         <form id="reportForm" class="inline-form">
@@ -308,7 +368,6 @@
                         </div>
                     </div>
 
-                    <!-- ABA DESEMPENHO -->
                     <div id="tab-performance" class="tab-content">
                         <h3>⚡ Registro de Desempenho</h3>
                         <form id="performanceForm" class="inline-form">
@@ -317,7 +376,6 @@
                                     <label for="performanceDate">Data</label>
                                     <input type="date" id="performanceDate" required>
                                 </div>
-                                <!-- NOVO CAMPO: DISCIPLINA -->
                                 <div class="form-section">
                                     <label for="performanceSubject">Disciplina</label>
                                     <select id="performanceSubject" required>
@@ -341,7 +399,7 @@
                                 </div>
                                 <div class="form-section">
                                     <label for="performanceDetails">Detalhes</label>
-                                    <input type="text" id="performanceDetails" placeholder="Ex: Errou muito na pág 5" required>
+                                    <input type="text" id="performanceDetails" placeholder="Ex: Previsão 15min, concluiu em 12min" required>
                                 </div>
                             </div>
                             <button type="submit" class="btn">Adicionar Registro</button>
