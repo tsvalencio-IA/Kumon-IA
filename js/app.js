@@ -1,5 +1,5 @@
 // App.js - Plataforma de Diário de Reuniões Kumon
-// VERSÃO FOLHA DE REGISTRO + CÉREBRO ESCONDIDO
+// VERSÃO FOLHA DE REGISTRO + CÉREBRO ESCONDIDO + CORREÇÃO DASHBOARD
 const App = {
     state: {
         userId: null,
@@ -136,14 +136,16 @@ const App = {
 
     openDashboard() {
         this.elements.dashboardModal.classList.remove('hidden');
-        this.generateDashboardData();
+        // Atraso de 10ms para garantir que o modal esteja visível antes de desenhar
+        setTimeout(() => {
+            this.generateDashboardData();
+        }, 10);
     },
 
     closeDashboard() {
         this.elements.dashboardModal.classList.add('hidden');
     },
 
-    // Lógica do Dashboard (Inalterada, pois já lê as 3 matérias)
     generateDashboardData() {
         const students = Object.values(this.state.students);
         
@@ -269,7 +271,11 @@ const App = {
                     data: [subjectCounts['Matemática'], subjectCounts['Português'], subjectCounts['Inglês']],
                     backgroundColor: ['#0078c1', '#d62828', '#f59e0b']
                 }]
-            }, options: { responsive: true, maintainAspectRatio: false }
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false // **CORREÇÃO DO BUG**
+            }
         });
 
         const ctxMood = document.getElementById('moodChart').getContext('2d');
@@ -278,7 +284,11 @@ const App = {
             data: {
                 labels: ['Em Risco', 'Motivados', 'Neutros/Sem Análise'],
                 datasets: [{ data: [moodData.risk, moodData.star, moodData.neutral], backgroundColor: ['#d62828', '#28a745', '#eaf6ff'] }]
-            }, options: { responsive: true, maintainAspectRatio: false }
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false // **CORREÇÃO DO BUG**
+            }
         });
     },
 
@@ -744,85 +754,4 @@ RETORNE APENAS JSON (Sem markdown) NESTE FORMATO EXATO:
             return `<strong>${e.material}</strong><br><span class="text-sm text-gray-600">${e.notes || 'Sem obs.'}</span>`;
         }
         if (type === 'reportHistory') {
-            return `Nota Escolar: <strong>${e.grade}</strong> ${e.fileurl ? '<a href="'+e.fileurl+'" target="_blank" class="text-sm">[Anexo]</a>' : ''}`;
-        }
-        if (type === 'performanceLog') {
-            // DETALHES DA NOVA "FOLHA DE REGISTRO"
-            let timeInfo = `<strong>Tempo:</strong> ${e.timeTaken} min`;
-            if (e.timeGoal) timeInfo += ` (Previsto: ${e.timeGoal} min)`;
-            
-            let gradeColor = "inherit";
-            if(e.gradeKumon === 'REPETIR' || e.gradeKumon === '<80%') gradeColor = "var(--kumon-red)";
-            if(e.gradeKumon === '100%') gradeColor = "var(--success)";
-
-            return `<strong>Bloco:</strong> ${e.block}<br>${timeInfo}<br><strong>Nota:</strong> <span style="color: ${gradeColor}; font-weight: bold;">${e.gradeKumon}</span>`;
-        }
-    },
-
-    async deleteHistoryEntry(type, id) {
-        if (!confirm('Excluir este registro?')) return;
-        const s = this.state.students[this.state.currentStudentId];
-        s[type] = s[type].filter(e => e.id !== id);
-        await this.setData('alunos/lista_alunos', { students: this.state.students });
-        this.loadStudentHistories(this.state.currentStudentId);
-        await this.updateBrainFromStudents(); // Atualiza cérebro da IA
-    },
-
-    async uploadFileToCloudinary(file, folder) { 
-        const f = new FormData(); 
-        f.append('file', file); 
-        f.append('upload_preset', cloudinaryConfig.uploadPreset); 
-        f.append('folder', `${this.state.userId}/${folder}`);
-        const r = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/upload`, { method: 'POST', body: f });
-        if (!r.ok) throw new Error("Falha no upload para Cloudinary.");
-        return (await r.json()).secure_url;
-    },
-    
-    // =====================================================================
-    // ================== LÓGICA DE ADMIN (CÉREBRO) ========================
-    // =====================================================================
-    
-    // ATUALIZADO: Menu de Admin
-    promptForReset() { 
-        const code = prompt('Código de Administrador:');
-        if (code !== '*177') {
-            if (code !== null) alert("Código incorreto.");
-            return;
-        }
-
-        // Se o código está correto, abre o menu
-        const choice = prompt("Opções de Admin:\n\nDigite 1 - RESETAR UNIDADE\nDigite 2 - ATUALIZAR CÉREBRO IA");
-
-        if (choice === '1') {
-            // Fluxo de Reset
-            if (prompt('Esta ação é irreversível. Digite APAGAR TUDO para confirmar.')==='APAGAR TUDO') {
-                this.hardResetUserData(); 
-            } else {
-                alert("Reset cancelado.");
-            }
-        } else if (choice === '2') {
-            // Fluxo de Abrir Modal do Cérebro
-            this.openBrainModal();
-        } else {
-            alert("Opção inválida.");
-        }
-    },
-
-    openBrainModal() {
-        this.elements.brainModal.classList.remove('hidden');
-    },
-
-    closeBrainModal() {
-        this.elements.brainModal.classList.add('hidden');
-    },
-
-    async hardResetUserData() { 
-        try {
-            await this.getNodeRef('').remove(); 
-            alert("Sistema resetado. A página será recarregada.");
-            location.reload();
-        } catch(e) {
-            alert("Erro ao resetar: " + e.message);
-        }
-    }
-};
+            return `Nota Escolar:
