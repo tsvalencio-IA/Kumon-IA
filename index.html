@@ -16,10 +16,19 @@
         .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
         .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Cores das Matérias para Badges */
+        .subject-badge {
+            color: white; padding: 3px 8px; border-radius: 4px; 
+            font-size: 0.8em; font-weight: bold; text-transform: uppercase;
+        }
+        .subject-Matemática { background-color: #0078c1; }
+        .subject-Português { background-color: #d62828; }
+        .subject-Inglês { background-color: #f59e0b; }
+        .subject-Outra { background-color: #888; }
     </style>
 </head>
 <body id="app-page">
-    <!-- TELA DE LOGIN (CRUCIAL PARA O AUTH.JS) -->
     <div id="login-screen" class="login-container">
         <h1 class="text-3xl font-bold text-cyan-400 mb-2 text-center">Central de Comando</h1>
         <p class="text-lg font-semibold text-white text-center">Kumon</p>
@@ -61,6 +70,7 @@
         </header>
 
         <main>
+            <!-- Módulos Inalterados (Brain, Meetings, Transcription) -->
             <fieldset id="brainModule">
                 <legend>🧠 Atualizar 'Cérebro' da IA</legend>
                 <div class="form-section">
@@ -149,6 +159,7 @@
         </footer>
     </div>
 
+    <!-- MODAL DASHBOARD (Inalterado) -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
@@ -207,6 +218,7 @@
         </div>
     </div>
 
+    <!-- MODAL ALUNO (Atualizado com "Folha de Registro") -->
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -215,6 +227,7 @@
             </div>
             <div class="modal-body">
                 <form id="studentForm">
+                    <!-- Campos de Aluno Inalterados -->
                     <input type="hidden" id="studentId">
                     <div class="grid-2-col">
                         <div class="form-section">
@@ -248,13 +261,15 @@
 
                 <div class="tabs-container">
                     <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="programming">📅 Programação</button>
-                        <button class="tab-btn" data-tab="reports">📊 Boletins</button>
-                        <button class="tab-btn" data-tab="performance">⚡ Desempenho</button>
+                        <!-- ABAS ATUALIZADAS -->
+                        <button class="tab-btn active" data-tab="performance">⚡ Folha de Registro</button>
+                        <button class="tab-btn" data-tab="programming">📅 Programação</button>
+                        <button class="tab-btn" data-tab="reports">📊 Boletins Escolares</button>
                         <button class="tab-btn" data-tab="analysis">🤖 Análise IA</button>
                     </div>
-
-                    <div id="tab-programming" class="tab-content active">
+                    
+                    <!-- 1. ABA PROGRAMAÇÃO (Inalterada, mas agora é a segunda) -->
+                    <div id="tab-programming" class="tab-content">
                         <h3>📅 Programação de Material</h3>
                         <form id="programmingForm" class="inline-form">
                             <div class="grid-3-col">
@@ -295,6 +310,7 @@
                         </div>
                     </div>
 
+                    <!-- 2. ABA BOLETINS ESCOLARES (Nome mudado) -->
                     <div id="tab-reports" class="tab-content">
                         <h3>📊 Boletins Escolares</h3>
                         <form id="reportForm" class="inline-form">
@@ -304,7 +320,7 @@
                                     <input type="date" id="reportDate" required>
                                 </div>
                                 <div class="form-section">
-                                    <label for="reportSubject">Disciplina</label>
+                                    <label for="reportSubject">Disciplina Escolar</label>
                                     <select id="reportSubject" required>
                                         <option value="Matemática">Matemática</option>
                                         <option value="Português">Português</option>
@@ -313,7 +329,7 @@
                                     </select>
                                 </div>
                                 <div class="form-section">
-                                    <label for="reportGrade">Nota</label>
+                                    <label for="reportGrade">Nota (0-10)</label>
                                     <input type="number" id="reportGrade" min="0" max="10" step="0.1" required>
                                 </div>
                             </div>
@@ -321,7 +337,7 @@
                                 <label for="reportFile">Anexar Boletim (Foto)</label>
                                 <input type="file" id="reportFile" accept="image/*,.pdf">
                             </div>
-                            <button type="submit" class="btn">Adicionar Boletim</button>
+                            <button type="submit" class="btn">Adicionar Boletim Escolar</button>
                         </form>
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -337,10 +353,11 @@
                         </div>
                     </div>
 
-                    <div id="tab-performance" class="tab-content">
-                        <h3>⚡ Registro de Desempenho</h3>
+                    <!-- 3. ABA FOLHA DE REGISTRO (Upgrade da antiga "Desempenho") -->
+                    <div id="tab-performance" class="tab-content active">
+                        <h3>⚡ Folha de Registro (Desempenho Diário)</h3>
                         <form id="performanceForm" class="inline-form">
-                            <div class="grid-2-col">
+                            <div class="grid-3-col">
                                 <div class="form-section">
                                     <label for="performanceDate">Data</label>
                                     <input type="date" id="performanceDate" required>
@@ -353,29 +370,39 @@
                                         <option value="Inglês">Inglês</option>
                                     </select>
                                 </div>
+                                 <div class="form-section">
+                                    <label for="performanceBlock">Bloco/Páginas</label>
+                                    <input type="text" id="performanceBlock" placeholder="Ex: D1-D10 (10p)" required>
+                                </div>
                             </div>
-                            <div class="grid-2-col">
+                            <div class="grid-3-col">
                                 <div class="form-section">
-                                    <label for="performanceType">Tipo de Registro</label>
-                                    <select id="performanceType" required>
-                                        <option value="CORRECAO">Correção (100%)</option>
-                                        <option value="PREVISAO">Previsão de Tempo</option>
-                                        <option value="REPETICAO">Repetição de Bloco</option>
-                                        <option value="CONCLUSAO">Conclusão de Estágio</option>
-                                        <option value="ELOGIO">Elogio / Comportamento</option>
-                                        <option value="ALERTA">Alerta / Dificuldade</option>
-                                    </select>
+                                    <label for="performanceTimeGoal">Tempo Previsto (min)</label>
+                                    <input type="number" id="performanceTimeGoal" placeholder="Ex: 20">
                                 </div>
                                 <div class="form-section">
-                                    <label for="performanceDetails">Detalhes</label>
-                                    <input type="text" id="performanceDetails" placeholder="Ex: Previsão 15min, concluiu em 12min" required>
+                                    <label for="performanceTimeTaken">Tempo Realizado (min)</label>
+                                    <input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="performanceGradeKumon">Nota / Conceito</label>
+                                    <select id="performanceGradeKumon" required>
+                                        <option value="100%">100% (Ótimo)</option>
+                                        <option value="95-99%">95-99% (Bom)</option>
+                                        <option value="90-94%">90-94% (Bom)</option>
+                                        <option value="80-89%">80-89% (Regular)</option>
+                                        <option value="<80%">< 80% (Atenção)</option>
+                                        <option value="REPETIR">REPETIR (Refazer)</option>
+                                        <option value="ELOGIO">ELOGIO (Comportamento)</option>
+                                        <option value="ALERTA">ALERTA (Comportamento)</option>
+                                    </select>
                                 </div>
                             </div>
                             <button type="submit" class="btn">Adicionar Registro</button>
                         </form>
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4>Histórico de Desempenho</h4>
+                                <h4>Histórico de Registros</h4>
                                 <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
@@ -387,6 +414,7 @@
                         </div>
                     </div>
 
+                    <!-- 4. ABA ANÁLISE IA (Inalterada) -->
                     <div id="tab-analysis" class="tab-content">
                         <h3>🤖 Última Análise de Reunião (IA)</h3>
                         <div class="analysis-section">
@@ -409,10 +437,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script> 
+    
+    <!-- Corrigido para a pasta 'js/' (um 's') -->
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
 </body>
 </html>
-
-
