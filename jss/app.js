@@ -77,7 +77,7 @@ const App = {
             reportHistory: document.getElementById('reportHistory'),
             performanceLog: document.getElementById('performanceHistory'), 
 
-            // Filtros
+            // Filtros (ESTES ERAM O PROBLEMA - O JS TENTAVA ACHAR ELES NO HTML VELHO E QUEBRAVA)
             filterProgramming: document.getElementById('filterProgramming'),
             filterReports: document.getElementById('filterReports'),
             filterPerformance: document.getElementById('filterPerformance'),
@@ -112,6 +112,7 @@ const App = {
         this.elements.reportForm.addEventListener('submit', (e) => this.addHistoryEntry(e, 'reportHistory', this.elements.reportForm));
         this.elements.performanceForm.addEventListener('submit', (e) => this.addHistoryEntry(e, 'performanceLog', this.elements.performanceForm)); 
         
+        // Listeners para os filtros
         this.elements.filterProgramming.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
         this.elements.filterReports.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
         this.elements.filterPerformance.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
@@ -135,31 +136,26 @@ const App = {
     generateDashboardData() {
         const students = Object.values(this.state.students);
         
-        // 1. Inicialização de Contadores e Estruturas
         const stagesBySubject = { 'Math': {}, 'Port': {}, 'Eng': {} };
         const subjectCounts = { 'Matemática': 0, 'Português': 0, 'Inglês': 0 };
         let totalSubjectsEnrollments = 0;
         let multiSubjectStudents = 0;
         
-        // 2. Loop Mestre de Dados
         students.forEach(s => {
             let studentSubjectsCount = 0;
 
-            // Analisa Matemática
             if (s.mathStage && s.mathStage.trim()) {
                 const letter = s.mathStage.trim().charAt(0).toUpperCase();
                 stagesBySubject['Math'][letter] = (stagesBySubject['Math'][letter] || 0) + 1;
                 subjectCounts['Matemática']++;
                 studentSubjectsCount++;
             }
-            // Analisa Português
             if (s.portStage && s.portStage.trim()) {
                 const letter = s.portStage.trim().charAt(0).toUpperCase();
                 stagesBySubject['Port'][letter] = (stagesBySubject['Port'][letter] || 0) + 1;
                 subjectCounts['Português']++;
                 studentSubjectsCount++;
             }
-            // Analisa Inglês
             if (s.engStage && s.engStage.trim()) {
                 const letter = s.engStage.trim().charAt(0).toUpperCase();
                 stagesBySubject['Eng'][letter] = (stagesBySubject['Eng'][letter] || 0) + 1;
@@ -171,7 +167,6 @@ const App = {
             if (studentSubjectsCount > 1) multiSubjectStudents++;
         });
 
-        // 3. Dados de Risco/Motivação (IA)
         const riskStudents = [];
         const starStudents = [];
         let riskCount = 0, starCount = 0, neutralCount = 0;
@@ -189,18 +184,14 @@ const App = {
             } else { neutralCount++; }
         });
 
-        // 4. Atualizar KPIs Visuais
         this.elements.kpiTotalStudents.textContent = students.length;
         this.elements.kpiTotalSubjects.textContent = totalSubjectsEnrollments;
         this.elements.kpiMultiSubject.textContent = multiSubjectStudents;
         this.elements.kpiRiskCount.textContent = riskCount;
 
-        // 5. Renderizar Listas e Gráficos
         this.renderDashboardList(this.elements.riskList, riskStudents, '⚠️');
         this.renderDashboardList(this.elements.starList, starStudents, '⭐');
         
-        // Prepara os dados para o gráfico agrupado
-        // Coleta TODAS as letras de estágios existentes em todas as matérias para criar o eixo X
         const allLetters = new Set([
             ...Object.keys(stagesBySubject['Math']),
             ...Object.keys(stagesBySubject['Port']),
@@ -236,7 +227,6 @@ const App = {
         if (this.state.charts.subjects) this.state.charts.subjects.destroy();
         if (this.state.charts.mood) this.state.charts.mood.destroy();
 
-        // Gráfico 1: Estágios Agrupados (A verdadeira visão por matéria)
         const ctxStages = document.getElementById('stagesChart').getContext('2d');
         this.state.charts.stages = new Chart(ctxStages, {
             type: 'bar',
@@ -255,7 +245,6 @@ const App = {
             }
         });
 
-        // Gráfico 2: Distribuição de Matrículas (Pizza)
         const ctxSubjects = document.getElementById('subjectsChart').getContext('2d');
         this.state.charts.subjects = new Chart(ctxSubjects, {
             type: 'pie',
@@ -268,7 +257,6 @@ const App = {
             }, options: { responsive: true }
         });
 
-        // Gráfico 3: Humor (Rosca)
         const ctxMood = document.getElementById('moodChart').getContext('2d');
         this.state.charts.mood = new Chart(ctxMood, {
             type: 'doughnut',
@@ -279,7 +267,6 @@ const App = {
         });
     },
 
-    // ... [Upload e Transcrição permanecem iguais, mas são vitais para o app funcionar] ...
     handleFileUpload() {
         const file = this.elements.audioUpload.files[0];
         const studentSelected = this.elements.meetingStudentSelect.value;
@@ -381,6 +368,7 @@ CONTEXTO GERAL: ${JSON.stringify(brain, null, 2)}
 REUNIÃO: "${text}"
 NOTAS: "${notes}"
 RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": "...", "diagnostico_kumon": {}, "plano_acao_imediato": [], "requer_validacao_humana": true }`;
+        
         const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } }) });
         const data = await response.json();
         return JSON.parse(data.candidates[0].content.parts[0].text);
@@ -389,7 +377,6 @@ RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": ".
     renderReport(data) { this.elements.reportContent.textContent = JSON.stringify(data, null, 2); },
     downloadReport() { /* ... */ },
     
-    // Funções de Banco de Dados (Firebase)
     getNodeRef(path) { return this.state.userId ? this.state.db.ref(`gestores/${this.state.userId}/${path}`) : null; },
     async fetchData(path) { const snap = await this.getNodeRef(path).get(); return snap.exists() ? snap.val() : null; },
     async setData(path, data) { await this.getNodeRef(path).set(data); },
@@ -478,9 +465,12 @@ RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": ".
         this.loadStudents(); this.closeStudentModal(); alert('Excluído!');
     },
 
+    // === FUNÇÕES DE HISTÓRICO ATUALIZADAS (FILTROS E DISCIPLINAS) ===
+
     loadStudentHistories(id) {
         if (!id) return;
         const s = this.state.students[id];
+        
         const progFilter = this.elements.filterProgramming.value;
         const repFilter = this.elements.filterReports.value;
         const perfFilter = this.elements.filterPerformance.value;
@@ -504,7 +494,7 @@ RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": ".
         
         if (type === 'programmingHistory') {
             entry.date = form.querySelector('#programmingDate').value;
-            entry.subject = form.querySelector('#programmingSubject').value;
+            entry.subject = form.querySelector('#programmingSubject').value; 
             entry.material = form.querySelector('#programmingMaterial').value;
             entry.notes = form.querySelector('#programmingNotes').value;
         } else if (type === 'reportHistory') {
@@ -515,7 +505,7 @@ RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": ".
             if (file) entry.fileurl = await this.uploadFileToCloudinary(file, 'boletins');
         } else if (type === 'performanceLog') {
             entry.date = form.querySelector('#performanceDate').value;
-            entry.subject = form.querySelector('#performanceSubject').value;
+            entry.subject = form.querySelector('#performanceSubject').value; 
             entry.type = form.querySelector('#performanceType').value;
             entry.details = form.querySelector('#performanceDetails').value;
         }
@@ -535,16 +525,19 @@ RETORNE JSON ESTRITO: { "resumo_executivo": "...", "analise_psicopedagogica": ".
             container.innerHTML = '<p class="text-gray-500 text-sm">Sem registros.</p>';
             return;
         }
+
         const filteredData = data.filter(e => filter === 'all' || e.subject === filter);
+
         if (filteredData.length === 0) {
             container.innerHTML = '<p class="text-gray-500 text-sm">Nada encontrado neste filtro.</p>';
             return;
         }
+
         container.innerHTML = filteredData.sort((a,b) => new Date(b.date)-new Date(a.date)).map(e => `
             <div class="history-item">
                 <div class="history-item-header">
                     <strong>${e.date || 'Data?'}</strong>
-                    ${this.getSubjectBadge(e.subject)}
+                    ${this.getSubjectBadge(e.subject)} 
                 </div>
                 <div>${this.getHistoryDetails(type, e)}</div>
                 <button onclick="App.deleteHistoryEntry('${type}','${e.id}')" class="delete-history-btn">&times;</button>
