@@ -1,16 +1,16 @@
-const CACHE_NAME = 'kumon-diario-v8'; // <--- ATUALIZADO PARA v8 (FORÇA ATUALIZAÇÃO)
+const CACHE_NAME = 'kumon-diario-v9'; // <--- ATUALIZADO PARA v9 (CRÍTICO)
 const urlsToCache = [
     './',
     './index.html',
     './css/styles.css',
     './js/config.js',
     './js/app.js',
-    './js/auth.js',
+    './js/auth.js', // Garante que o novo auth.js seja cacheado
     './icon.png'
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Força o novo SW a assumir imediatamente
+  self.skipWaiting(); 
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
         return cache.addAll(urlsToCache);
@@ -37,6 +37,6 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Controla as páginas imediatamente
+    }).then(() => self.clients.claim())
   );
 });
