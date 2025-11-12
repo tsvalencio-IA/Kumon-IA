@@ -9,36 +9,14 @@
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#0078c1">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <!-- Chart.js para Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Estilos inline para o Dashboard Avançado -->
     <style>
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .kpi-card {
-            background: #f8f9fa;
-            border: 1px solid #d1e9f6;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .kpi-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--kumon-blue);
-            display: block;
-        }
-        .kpi-label {
-            font-size: 0.85em;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
+        .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body id="app-page">
@@ -69,6 +47,7 @@
                 <div class="user-info">
                     <p id="userEmail" class="font-semibold"></p>
                     <div class="header-actions">
+                        <!-- BOTÃO DE DASHBOARD (O JS PROCURA ISSO) -->
                         <button id="dashboard-btn" class="options-btn" style="border-color: var(--kumon-blue); color: var(--kumon-blue);">
                             <i class='bx bxs-dashboard'></i>
                             <span>Dashboard Geral</span>
@@ -171,7 +150,7 @@
         </footer>
     </div>
 
-    <!-- Modal de Dashboard (ATUALIZADO) -->
+    <!-- Modal de Dashboard -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
@@ -179,8 +158,6 @@
                 <button id="closeDashboardBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                
-                <!-- KPI Cards -->
                 <div class="kpi-container">
                     <div class="kpi-card">
                         <span class="kpi-number" id="kpi-total-students">0</span>
@@ -201,22 +178,17 @@
                 </div>
 
                 <div class="grid-2-col">
-                    <!-- Gráfico 1: Distribuição Detalhada -->
                     <div class="section-box" style="grid-column: span 2;">
                         <h3>📈 Distribuição de Estágios por Disciplina</h3>
-                        <div style="height: 300px;">
-                            <canvas id="stagesChart"></canvas>
-                        </div>
+                        <div style="height: 300px;"><canvas id="stagesChart"></canvas></div>
                     </div>
                 </div>
 
                 <div class="grid-2-col" style="margin-top: 20px;">
-                    <!-- Gráfico 2: Market Share -->
                     <div class="section-box">
                         <h3>🍰 Distribuição de Matrículas</h3>
                         <canvas id="subjectsChart"></canvas>
                     </div>
-                    <!-- Gráfico 3: Termômetro -->
                     <div class="section-box">
                         <h3>🌡️ Termômetro Emocional (IA)</h3>
                         <canvas id="moodChart"></canvas>
@@ -237,7 +209,7 @@
         </div>
     </div>
 
-    <!-- Modal de Aluno (Inalterado) -->
+    <!-- Modal de Aluno -->
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -285,6 +257,7 @@
                         <button class="tab-btn" data-tab="analysis">🤖 Análise IA</button>
                     </div>
 
+                    <!-- FILTROS SÃO CRITICOS PARA O JS NÃO QUEBRAR -->
                     <div id="tab-programming" class="tab-content active">
                         <h3>📅 Programação de Material</h3>
                         <form id="programmingForm" class="inline-form">
@@ -315,6 +288,7 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Programação</h4>
+                                <!-- O JS PRECISA DESTE ID: filterProgramming -->
                                 <select id="filterProgramming" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
@@ -357,6 +331,7 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Boletins</h4>
+                                <!-- O JS PRECISA DESTE ID: filterReports -->
                                 <select id="filterReports" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas</option>
                                     <option value="Matemática">Matemática</option>
@@ -407,6 +382,7 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Desempenho</h4>
+                                <!-- O JS PRECISA DESTE ID: filterPerformance -->
                                 <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
