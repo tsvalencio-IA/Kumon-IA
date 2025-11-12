@@ -150,7 +150,7 @@
         </footer>
     </div>
 
-    <!-- MODAL DASHBOARD (Inalterado) -->
+    <!-- MODAL DASHBOARD (CORRIGIDO) -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
@@ -187,11 +187,17 @@
                 <div class="grid-2-col" style="margin-top: 20px;">
                     <div class="section-box">
                         <h3>🍰 Distribuição de Matrículas</h3>
-                        <canvas id="subjectsChart"></canvas>
+                        <!-- **CORREÇÃO:** Adicionado DIV com altura fixa -->
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="subjectsChart"></canvas>
+                        </div>
                     </div>
                     <div class="section-box">
                         <h3>🌡️ Termômetro Emocional (IA)</h3>
-                        <canvas id="moodChart"></canvas>
+                        <!-- **CORREÇÃO:** Adicionado DIV com altura fixa -->
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="moodChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
