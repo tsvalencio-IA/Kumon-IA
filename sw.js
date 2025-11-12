@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kumon-diario-v13'; // <--- ATUALIZADO PARA v13 (CRÍTICO)
+const CACHE_NAME = 'kumon-diario-v12'; // <--- ATUALIZADO PARA v12 (CRÍTICO)
 const urlsToCache = [
     './',
     './index.html',
