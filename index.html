@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#0078c1">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <!-- Chart.js para Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -20,6 +19,7 @@
     </style>
 </head>
 <body id="app-page">
+    <!-- TELA DE LOGIN (CRUCIAL PARA O AUTH.JS) -->
     <div id="login-screen" class="login-container">
         <h1 class="text-3xl font-bold text-cyan-400 mb-2 text-center">Central de Comando</h1>
         <p class="text-lg font-semibold text-white text-center">Kumon</p>
@@ -47,7 +47,6 @@
                 <div class="user-info">
                     <p id="userEmail" class="font-semibold"></p>
                     <div class="header-actions">
-                        <!-- BOTÃO DE DASHBOARD (O JS PROCURA ISSO) -->
                         <button id="dashboard-btn" class="options-btn" style="border-color: var(--kumon-blue); color: var(--kumon-blue);">
                             <i class='bx bxs-dashboard'></i>
                             <span>Dashboard Geral</span>
@@ -150,7 +149,6 @@
         </footer>
     </div>
 
-    <!-- Modal de Dashboard -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
@@ -209,7 +207,6 @@
         </div>
     </div>
 
-    <!-- Modal de Aluno -->
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -257,7 +254,6 @@
                         <button class="tab-btn" data-tab="analysis">🤖 Análise IA</button>
                     </div>
 
-                    <!-- FILTROS SÃO CRITICOS PARA O JS NÃO QUEBRAR -->
                     <div id="tab-programming" class="tab-content active">
                         <h3>📅 Programação de Material</h3>
                         <form id="programmingForm" class="inline-form">
@@ -288,7 +284,6 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Programação</h4>
-                                <!-- O JS PRECISA DESTE ID: filterProgramming -->
                                 <select id="filterProgramming" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
@@ -331,7 +326,6 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Boletins</h4>
-                                <!-- O JS PRECISA DESTE ID: filterReports -->
                                 <select id="filterReports" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas</option>
                                     <option value="Matemática">Matemática</option>
@@ -382,7 +376,6 @@
                         <div class="history-section">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Desempenho</h4>
-                                <!-- O JS PRECISA DESTE ID: filterPerformance -->
                                 <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
