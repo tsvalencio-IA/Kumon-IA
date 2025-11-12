@@ -60,7 +60,7 @@
                             <i class='bx bxs-dashboard'></i>
                             <span>Dashboard Geral</span>
                         </button>
-                        <button id="system-options-btn" class="options-btn" title="Opções de sistema">
+                        <button id="system-options-btn" class="options-btn" title="Opções de sistema (Admin)">
                             <i class='bx bx-cog'></i>
                         </button>
                         <button id="logout-button" class="logout-btn">Sair</button>
@@ -70,16 +70,7 @@
         </header>
 
         <main>
-            <!-- Módulos Inalterados (Brain, Meetings, Transcription) -->
-            <fieldset id="brainModule">
-                <legend>🧠 Atualizar 'Cérebro' da IA</legend>
-                <div class="form-section">
-                    <label for="brainFileUpload">📁 Enviar novo arquivo JSON com informações da franquia</label>
-                    <input type="file" id="brainFileUpload" accept=".json" />
-                    <button id="uploadBrainFileBtn" class="btn">Enviar e Atualizar</button>
-                    <p class="text-sm text-gray-500 mt-1">Este arquivo será mesclado com o 'brain.json' atual no banco de dados.</p>
-                </div>
-            </fieldset>
+            <!-- Módulo do Cérebro (brainModule) foi MOVIDO para um modal no final do <body> -->
 
             <fieldset id="meetingsModule">
                 <legend>Diário de Reuniões de Pais</legend>
@@ -429,6 +420,27 @@
             <div class="modal-footer">
                 <button id="saveStudentBtn" class="btn">💾 Salvar Aluno</button>
                 <button id="deleteStudentBtn" class="btn btn-danger">🗑️ Excluir Aluno</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- **** NOVO MODAL DO CÉREBRO (ESCONDIDO) **** -->
+    <div id="brainModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>🧠 Atualizar Cérebro da IA (Admin)</h2>
+                <button id="closeBrainModalBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <fieldset>
+                    <legend>Upload de Contexto</legend>
+                    <div class="form-section">
+                        <label for="brainFileUploadModal">📁 Enviar novo arquivo JSON com informações da franquia</label>
+                        <input type="file" id="brainFileUploadModal" accept=".json" />
+                        <button id="uploadBrainFileBtnModal" class="btn">Enviar e Atualizar</button>
+                        <p class="text-sm text-gray-500 mt-1">Este arquivo será mesclado com o 'brain.json' atual no banco de dados.</p>
+                    </div>
+                </fieldset>
             </div>
         </div>
     </div>
