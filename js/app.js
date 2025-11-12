@@ -1,5 +1,5 @@
 // App.js - Plataforma de Diário de Reuniões Kumon
-// VERSÃO FOLHA DE REGISTRO: Simula o boletim real do Kumon.
+// VERSÃO FOLHA DE REGISTRO + CÉREBRO ESCONDIDO
 const App = {
     state: {
         userId: null,
@@ -85,14 +85,17 @@ const App = {
             filterReports: document.getElementById('filterReports'),
             filterPerformance: document.getElementById('filterPerformance'),
 
-            brainFileUpload: document.getElementById('brainFileUpload'),
-            uploadBrainFileBtn: document.getElementById('uploadBrainFileBtn'),
+            // Elementos do Modal Cérebro (ADMIN ESCONDIDO)
+            brainModal: document.getElementById('brainModal'),
+            closeBrainModalBtn: document.getElementById('closeBrainModalBtn'),
+            brainFileUploadModal: document.getElementById('brainFileUploadModal'),
+            uploadBrainFileBtnModal: document.getElementById('uploadBrainFileBtnModal'),
         };
     },
 
     addEventListeners() {
         this.elements.logoutButton.addEventListener('click', () => firebase.auth().signOut());
-        this.elements.systemOptionsBtn.addEventListener('click', () => this.promptForReset());
+        this.elements.systemOptionsBtn.addEventListener('click', () => this.promptForReset()); // <<-- Lógica do Admin aqui
         this.elements.dashboardBtn.addEventListener('click', () => this.openDashboard());
         this.elements.closeDashboardBtn.addEventListener('click', () => this.closeDashboard());
         this.elements.dashboardModal.addEventListener('click', (e) => { if (e.target === this.elements.dashboardModal) this.closeDashboard(); });
@@ -102,7 +105,11 @@ const App = {
         this.elements.transcribeAudioBtn.addEventListener('click', () => this.transcribeAudioGemini()); 
         this.elements.analyzeTranscriptionBtn.addEventListener('click', () => this.analyzeTranscriptionGemini()); 
         this.elements.downloadReportBtn.addEventListener('click', () => this.downloadReport());
-        this.elements.uploadBrainFileBtn.addEventListener('click', () => this.handleBrainFileUpload());
+        
+        // Listeners do Modal Cérebro (ADMIN ESCONDIDO)
+        this.elements.uploadBrainFileBtnModal.addEventListener('click', () => this.handleBrainFileUpload());
+        this.elements.closeBrainModalBtn.addEventListener('click', () => this.closeBrainModal());
+        this.elements.brainModal.addEventListener('click', (e) => { if (e.target === this.elements.brainModal) this.closeBrainModal(); });
         
         this.elements.addStudentBtn.addEventListener('click', () => this.openStudentModal());
         this.elements.studentSearch.addEventListener('input', () => this.renderStudentList());
@@ -475,7 +482,7 @@ RETORNE APENAS JSON (Sem markdown) NESTE FORMATO EXATO:
     async saveBrainData(d) { await this.setData('brain', d); },
     
     async handleBrainFileUpload() {
-        const file = this.elements.brainFileUpload.files[0];
+        const file = this.elements.brainFileUploadModal.files[0]; // <-- Corrigido para o input do Modal
         if (!file) return alert('Selecione um arquivo JSON.');
         try {
             const text = await file.text();
@@ -484,6 +491,8 @@ RETORNE APENAS JSON (Sem markdown) NESTE FORMATO EXATO:
             const merged = { ...currentBrain, ...newBrain }; // Merge simples
             await this.saveBrainData(merged);
             alert('Cérebro atualizado!');
+            this.elements.brainFileUploadModal.value = ''; // Limpa o input
+            this.closeBrainModal(); // Fecha o modal
         } catch (e) {
             alert('Erro no arquivo JSON.');
         }
@@ -769,13 +778,44 @@ RETORNE APENAS JSON (Sem markdown) NESTE FORMATO EXATO:
         return (await r.json()).secure_url;
     },
     
+    // =====================================================================
+    // ================== LÓGICA DE ADMIN (CÉREBRO) ========================
+    // =====================================================================
+    
+    // ATUALIZADO: Menu de Admin
     promptForReset() { 
-        if(prompt('Código de Segurança:')==='*177' && prompt('Esta ação é irreversível. Digite APAGAR TUDO para confirmar.')==='APAGAR TUDO') {
-            this.hardResetUserData(); 
+        const code = prompt('Código de Administrador:');
+        if (code !== '*177') {
+            if (code !== null) alert("Código incorreto.");
+            return;
+        }
+
+        // Se o código está correto, abre o menu
+        const choice = prompt("Opções de Admin:\n\nDigite 1 - RESETAR UNIDADE\nDigite 2 - ATUALIZAR CÉREBRO IA");
+
+        if (choice === '1') {
+            // Fluxo de Reset
+            if (prompt('Esta ação é irreversível. Digite APAGAR TUDO para confirmar.')==='APAGAR TUDO') {
+                this.hardResetUserData(); 
+            } else {
+                alert("Reset cancelado.");
+            }
+        } else if (choice === '2') {
+            // Fluxo de Abrir Modal do Cérebro
+            this.openBrainModal();
         } else {
-            alert("Reset cancelado.");
+            alert("Opção inválida.");
         }
     },
+
+    openBrainModal() {
+        this.elements.brainModal.classList.remove('hidden');
+    },
+
+    closeBrainModal() {
+        this.elements.brainModal.classList.add('hidden');
+    },
+
     async hardResetUserData() { 
         try {
             await this.getNodeRef('').remove(); 
