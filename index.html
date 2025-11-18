@@ -15,16 +15,19 @@
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
-        .kpi-label { font-size: 0.9em; color: #555; }
-        .chart-container { position: relative; height: 300px; width: 100%; }
-        /* NOVO (V2): Estilos para o log de performance */
-        .performance-log-container { max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; background: #fdfdfd; }
-        .log-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--border-color); font-size: 0.9em; }
-        .log-item:last-child { border-bottom: none; }
-        .log-item-date { font-weight: 600; color: var(--kumon-blue); }
-        .log-item-details { display: flex; gap: 15px; }
-        .log-item-details span { color: var(--text-color); }
-        /* NOVO (V2): Estilos para o progresso da fila */
+        .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Cores das Matérias para Badges */
+        .subject-badge {
+            color: white; padding: 3px 8px; border-radius: 4px; 
+            font-size: 0.8em; font-weight: bold; text-transform: uppercase;
+        }
+        .subject-Matemática { background-color: #0078c1; }
+        .subject-Português { background-color: #d62828; }
+        .subject-Inglês { background-color: #f59e0b; }
+        .subject-Outra { background-color: #888; }
+        
+        /* NOVO (V3): Estilos para o progresso da fila de imagens */
         #taskAnalysisProgress {
             width: 100%;
             height: 25px;
@@ -48,297 +51,407 @@
             font-weight: 600;
             color: var(--kumon-blue);
         }
-
     </style>
 </head>
-<body>
-    
-    <div id="login-screen" class="login-container">
-        <form id="login-form">
-            <img src="icon.png" alt="Kumon Logo" class="login-logo">
-            <h2>Plataforma Orientadora</h2>
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" name="email" required>
+<body id="app-page">
+    <div id="login-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 z-[200]">
+        <h1 class="text-3xl font-bold text-cyan-400 mb-2 text-center">Central de Comando</h1>
+        <p class="text-lg font-semibold text-white text-center">Kumon</p>
+        <form id="login-form" class="login-container mt-8 text-left" style="background-color: #1f2937;">
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <input type="email" id="email" required class="form-input">
             </div>
-            <div class="form-group">
-                <label for="loginPassword">Senha</label>
-                <input type="password" id="loginPassword" name="password" required>
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+                <input type="password" id="password" required class="form-input">
             </div>
-            <button type="submit" class="btn btn-primary">Entrar</button>
-            <p id="login-error" class="error-message"></p>
+            <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded">Entrar</button>
+            <p id="login-error" class="text-red-500 text-sm mt-4 text-center h-4"></p>
         </form>
     </div>
 
-    <div id="app-container" class="hidden">
-        
-        <header class="app-header">
-            <div class="header-logo">
-                <img src="icon.png" alt="Kumon Logo">
-                <span>Plataforma Orientadora</span>
-            </div>
-            <div class="header-nav">
-                <button id="dashboard-btn" class="btn-nav" title="Dashboard Geral">
-                    <i class='bx bxs-dashboard'></i>
-                </button>
-                <button id="system-options-btn" class="btn-nav" title="Opções do Sistema (Admin)">
-                    <i class='bx bx-cog'></i>
-                </button>
-                <span id="userEmail" class="user-email"></span>
-                <button id="logout-button" class="btn-nav-logout" title="Sair">
-                    <i class='bx bx-log-out'></i>
-                </button>
+    <div id="app-container" class="container hidden">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>Diário de Reuniões Kumon</h1>
+                    <p class="unit-name">Método Kumon - Gestão Inteligente</p>
+                </div>
+                <div class="user-info">
+                    <p id="userEmail" class="font-semibold"></p>
+                    <div class="header-actions">
+                        <button id="dashboard-btn" class="options-btn" style="border-color: var(--kumon-blue); color: var(--kumon-blue);">
+                            <i class='bx bxs-dashboard'></i>
+                            <span>Dashboard Geral</span>
+                        </button>
+                        <button id="system-options-btn" class="options-btn" title="Opções de sistema (Admin)">
+                            <i class='bx bx-cog'></i>
+                        </button>
+                        <button id="logout-button" class="logout-btn">Sair</button>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <main class="main-container">
-            
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Meus Alunos</h3>
-                    <button id="addStudentBtn" class="btn-add" title="Adicionar Novo Aluno">+</button>
-                </div>
-                <div class="search-container">
-                    <input type="text" id="studentSearch" placeholder="Buscar aluno...">
-                </div>
-                <div id="studentList" class="student-list">
+        <main>
+            <fieldset id="meetingsModule">
+                <legend>Diário de Reuniões de Pais (Análise de Áudio)</legend>
+                
+                <div class="grid-2-col">
+                    <div class="form-section">
+                        <label for="meetingDate">📅 Data da Reunião</label>
+                        <input type="date" id="meetingDate">
                     </div>
-            </aside>
-
-            <section id="contentArea" class="content-area">
-                <div id="welcomeScreen" class="welcome-screen">
-                    <i class='bx bx-user-pin welcome-icon'></i>
-                    <h2>Selecione um aluno</h2>
-                    <p>Escolha um aluno na lista ao lado para ver seus detalhes e lançar progressos.</p>
+                    <div class="form-section">
+                        <label for="meetingStudentSelect">👨‍🎓 Reunião Sobre (Aluno)</label>
+                        <select id="meetingStudentSelect" required>
+                            <option value="" disabled selected>Selecione um aluno...</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div id="studentDetail" class="hidden">
-                    <div class="student-detail-header">
-                        <h2 id="studentNameHeader">Nome do Aluno</h2>
-                        <div class="student-meta">
-                            <span><i class='bx bx-user'></i> Resp: <strong id="studentResponsible"></strong></span>
-                            <span><i class='bx bx-phone'></i> Contato: <strong id="studentContact"></strong></span>
-                        </div>
-                    </div>
+                <div class="form-section">
+                    <label for="audioUpload">📤 Enviar Áudio Gravado (Galeria)</label>
+                    <input type="file" id="audioUpload" accept="audio/*">
+                    <p id="audioFileName" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                
+                <hr style="margin: 1rem 0;">
 
-                    <div class="stage-container">
-                        <div class="stage-card">
-                            <label>Matemática</label>
-                            <input type="text" id="mathStage" class="stage-input" placeholder="Ex: C150">
-                        </div>
-                        <div class="stage-card">
-                            <label>Português</label>
-                            <input type="text" id="portStage" class="stage-input" placeholder="Ex: CII 100">
-                        </div>
-                        <div class="stage-card">
-                            <label>Inglês</label>
-                            <input type="text" id="engStage" class="stage-input" placeholder="Ex: G50">
-                        </div>
-                        <button id="saveStagesBtn" class="btn btn-primary"><i class='bx bx-save'></i> Salvar Estágios</button>
-                    </div>
+                <div class="form-section">
+                    <label for="additionalNotes">📝 Notas Adicionais (Opcional)</label>
+                    <textarea id="additionalNotes" rows="3" placeholder="Observações sobre a reunião, decisões tomadas, etc."></textarea>
+                </div>
+                
+                <div class="button-container">
+                    <button id="transcribeAudioBtn" class="btn" disabled>1. Transcrever Áudio (Gemini)</button>
+                </div>
+            </fieldset>
 
-                    <div class="tabs">
-                        <button class="tab-link active" onclick="App.openTab(event, 'tabBoletim')">
-                            <i class='bx bx-spreadsheet'></i> Folha de Registro
-                        </button>
-                        <button class="tab-link" onclick="App.openTab(event, 'tabReunioes')">
-                            <i class='bx bx-conversation'></i> Diário de Reuniões
-                        </button>
-                        <button class="tab-link" onclick="App.openTab(event, 'tabPerformance')">
-                            <i class='bx bx-task'></i> Log de Tarefas (IA)
-                        </button>
-                    </div>
+            <fieldset id="transcriptionModule" class="section-box hidden">
+                <legend>🤖 Análise de Reunião (Áudio)</legend>
+                
+                <div class="form-section">
+                    <label for="transcriptionOutput">📄 Transcrição Gerada (Revise e edite se necessário)</label>
+                    <textarea id="transcriptionOutput" rows="10" placeholder="Aguardando transcrição do áudio..."></textarea>
+                </div>
 
-                    <div id="tabBoletim" class="tab-content active">
-                        <div class="tab-header">
-                            <h3>Histórico da Folha de Registro</h3>
-                            <button id="openAddGradeBtn" class="btn btn-secondary">
-                                <i class='bx bx-plus'></i> Lançar Boletim
-                            </button>
-                        </div>
-                        <div id="gradeHistory" class="history-list">
-                            </div>
-                    </div>
-                    
-                    <div id="tabReunioes" class="tab-content">
-                        <div class="tab-header">
-                            <h3>Histórico de Reuniões</h3>
-                            <button id="openMeetingBtn" class="btn btn-secondary">
-                                <i class='bx bx-plus'></i> Nova Reunião (IA)
-                            </button>
-                        </div>
-                        <div id="meetingHistory" class="history-list">
-                            </div>
-                    </div>
-                    
-                    <div id="tabPerformance" class="tab-content">
-                        <div class="tab-header">
-                            <h3>Log de Tarefas Analisadas (IA)</h3>
-                            <button id="openTaskAnalysisBtn" class="btn btn-warning">
-                                <i class='bx bx-images'></i> Analisar Tarefas (IA)
-                            </button>
-                        </div>
-                        <div id="performanceLogContainer" class="performance-log-container">
-                            </div>
-                    </div>
+                <div class="button-container">
+                    <button id="analyzeTranscriptionBtn" class="btn">2. Analisar Transcrição (Gemini)</button>
+                </div>
+            </fieldset>
 
+            <fieldset id="studentsModule">
+                <legend>Gestão de Alunos Inteligente (Ficha de Aluno)</legend>
+                <div class="students-header">
+                    <div class="button-container">
+                        <button id="addStudentBtn" class="btn">👨‍🎓 Adicionar Novo Aluno</button>
+                    </div>
+                    <div class="form-section">
+                        <label for="studentSearch">🔍 Pesquisar Aluno</label>
+                        <input type="text" id="studentSearch" placeholder="Digite o nome do aluno ou do responsável...">
+                    </div>
+                </div>
+                <div id="student-list" class="student-list">
+                    </div>
+            </fieldset>
+
+            <section id="reportSection" class="section-box hidden">
+                <h2>📊 Relatório Final Gerado (Áudio)</h2>
+                <div id="reportContent" class="report-content">
+                    <p>Relatório aparecerá aqui após processamento.</p>
+                </div>
+                <div class="button-container">
+                    <button id="downloadReportBtn" class="btn download-btn">Download Relatório (.json)</button>
                 </div>
             </section>
         </main>
+        
+        <footer>
+            <p>Desenvolvido com 🤖, por thIAguinho Soluções</p>
+        </footer>
+    </div>
+
+    <div id="dashboardModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header">
+                <h2>📊 Cérebro da Unidade</h2>
+                <button id="closeDashboardBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-total-students">0</span>
+                        <span class="kpi-label">Alunos Ativos</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-total-subjects">0</span>
+                        <span class="kpi-label">Matrículas Totais</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-number" id="kpi-multi-subject">0</span>
+                        <span class="kpi-label">Alunos Multi-Matérias</span>
+                    </div>
+                    <div class="kpi-card" style="border-color: var(--kumon-red);">
+                        <span class="kpi-number" id="kpi-risk-count" style="color: var(--kumon-red);">0</span>
+                        <span class="kpi-label">Em Atenção</span>
+                    </div>
+                </div>
+
+                <div class="grid-2-col">
+                    <div class="section-box" style="grid-column: span 2;">
+                        <h3>📈 Distribuição de Estágios por Disciplina</h3>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="stagesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" style="margin-top: 20px;">
+                    <div class="section-box">
+                        <h3>🍰 Distribuição de Matrículas</h3>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="subjectsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="section-box">
+                        <h3>🌡️ Termômetro Emocional (IA)</h3>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="moodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" style="margin-top: 20px;">
+                    <div class="section-box" style="border-left: 5px solid var(--kumon-red);">
+                        <h3 style="color: var(--kumon-red);">⚠️ Alunos em Atenção/Risco</h3>
+                        <ul id="riskList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                    <div class="section-box" style="border-left: 5px solid var(--success);">
+                        <h3 style="color: var(--success);">⭐ Alunos Destaque</h3>
+                        <ul id="starList" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="studentModalTitle">Adicionar Novo Aluno</h2>
-                <button id="closeStudentModalBtn" class="close-btn">&times;</button>
+                <h2 id="modalTitle">📋 Ficha do Aluno</h2>
+                <button id="closeModalBtn" class="close-btn">&times;</button>
             </div>
-            <form id="studentForm" class="modal-body">
-                <input type="hidden" id="studentId">
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="studentName">Nome do Aluno</label>
-                        <input type="text" id="studentName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="studentResponsible">Nome do Responsável</label>
-                        <input type="text" id="studentResponsible">
-                    </div>
-                    <div class="form-group">
-                        <label for="studentContact">Telefone (Responsável)</label>
-                        <input type="tel" id="studentContact" placeholder="(XX) 9XXXX-XXXX">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="deleteStudentBtn" class="btn btn-danger hidden" style="margin-right: auto;">Excluir Aluno</button>
-                    <button type="submit" class="btn btn-primary">Salvar Aluno</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="gradeModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2>Lançar Boletim / Folha de Registro</h2>
-                <button id="closeGradeModalBtn" class="close-btn">&times;</button>
-            </div>
-            <form id="gradeForm" class="modal-body">
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="gradeSubject">Matéria</label>
-                        <select id="gradeSubject" required>
-                            <option value="Matemática">Matemática</option>
-                            <option value="Português">Português</option>
-                            <option value="Inglês">Inglês</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="gradeDate">Data do Boletim</label>
-                        <input type="date" id="gradeDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="gradeValue">Nota/Conceito (Ex: 8.5 ou A)</label>
-                        <input type="text" id="gradeValue" placeholder="Nota" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="gradeAttachment">Anexar Boletim (Opcional)</label>
-                        <input type="file" id="gradeAttachment" accept="image/*,application/pdf">
-                        <button type="button" id="uploadAttachmentBtn" class="btn btn-secondary" style="width: auto; margin-top: 10px;">
-                            <i class='bx bx-upload'></i> Enviar Anexo
-                        </button>
-                        <div id="attachmentStatus"></div>
-                        <input type="hidden" id="gradeAttachmentUrl">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="meetingModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h2>Diário de Reunião (com IA)</h2>
-                <button id="closeMeetingModalBtn" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <form id="meetingForm">
-                    <p class="form-intro">Descreva a reunião ou cole a transcrição. A IA irá analisar e gerar o diagnóstico e plano de ação.</p>
-                    
-                    <fieldset>
-                        <legend>Dados da Reunião</legend>
-                        <div class="form-group">
-                            <label for="meetingDate">Data da Reunião</label>
-                            <input type="date" id="meetingDate" required>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <input type="hidden" id="studentId">
+                    <div class="grid-2-col">
+                        <div class="form-section">
+                            <label for="studentName">Nome do Aluno</label>
+                            <input type="text" id="studentName" required>
                         </div>
-                        <div class="form-group">
-                            <label for="meetingTranscription">Transcrição ou Resumo da Reunião</label>
-                            <textarea id="meetingTranscription" rows="10" placeholder="Cole a transcrição do áudio ou digite o resumo da conversa com os pais/aluno..."></textarea>
+                        <div class="form-section">
+                            <label for="studentResponsible">Responsável</label>
+                            <input type="text" id="studentResponsible" required>
                         </div>
-                    </fieldset>
-                    
-                    <div class="analysis-section">
-                        <div class="analysis-header">
-                            <h4><i class='bx bxs-magic-wand'></i> Análise da IA (Gemini)</h4>
-                            <button type="submit" id="generateAnalysisBtn" class="btn btn-primary">
-                                <i class='bx bx-brain'></i> Gerar Análise
-                            </button>
+                    </div>
+                    <div class="form-section">
+                        <label for="studentContact">Contato (Telefone/Email)</label>
+                        <input type="text" id="studentContact" placeholder="Ex: (17) 99999-9999">
+                    </div>
+                    <div class="grid-3-col">
+                        <div class="form-section">
+                            <label for="mathStage">Matemática (Estágio)</label>
+                            <input type="text" id="mathStage" placeholder="Ex: D150">
                         </div>
-                        <div id="analysisResult" class="analysis-content" style="min-height: 150px;">
-                            Aguardando geração da análise...
+                        <div class="form-section">
+                            <label for="portStage">Português (Estágio)</label>
+                            <input type="text" id="portStage" placeholder="Ex: CII 100">
+                        </div>
+                        <div class="form-section">
+                            <label for="engStage">Inglês (Estágio)</label>
+                            <input type="text" id="engStage" placeholder="Ex: G 50">
                         </div>
                     </div>
                 </form>
+
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="performance">⚡ Folha de Registro</button>
+                        <button class="tab-btn" data-tab="programming">📅 Programação</button>
+                        <button class="tab-btn" data-tab="reports">📊 Boletins Escolares</button>
+                        <button class="tab-btn" data-tab="analysis">🤖 Análise IA (Áudio)</button>
+                    </div>
+                    
+                    <div id="tab-programming" class="tab-content">
+                        <h3>📅 Programação de Material</h3>
+                        <form id="programmingForm" class="inline-form">
+                            <div class="grid-3-col">
+                                <div class="form-section">
+                                    <label for="programmingDate">Data</label>
+                                    <input type="date" id="programmingDate" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="programmingSubject">Disciplina</label>
+                                    <select id="programmingSubject" required>
+                                        <option value="Matemática">Matemática</option>
+                                        <option value="Português">Português</option>
+                                        <option value="Inglês">Inglês</option>
+                                    </select>
+                                </div>
+                                <div class="form-section">
+                                    <label for="programmingMaterial">Bloco/Páginas</label>
+                                    <input type="text" id="programmingMaterial" placeholder="Ex: D1-D10" required>
+                                </div>
+                            </div>
+                            <div class="form-section">
+                                <label for="programmingNotes">Observações</label>
+                                <textarea id="programmingNotes" rows="2" placeholder="Ex: Foco em operações básicas"></textarea>
+                            </div>
+                            <button type="submit" class="btn">Adicionar Programação</button>
+                        </form>
+                        <div class="history-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Histórico de Programação</h4>
+                                <select id="filterProgramming" class="form-input" style="width: auto; padding: 5px;">
+                                    <option value="all">Todas as Matérias</option>
+                                    <option value="Matemática">Matemática</option>
+                                    <option value="Português">Português</option>
+                                    <option value="Inglês">Inglês</option>
+                                </select>
+                            </div>
+                            <div id="programmingHistory" class="history-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="tab-reports" class="tab-content">
+                        <h3>📊 Boletins Escolares</h3>
+                        <form id="reportForm" class="inline-form">
+                            <div class="grid-3-col">
+                                <div class="form-section">
+                                    <label for="reportDate">Data</label>
+                                    <input type="date" id="reportDate" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="reportSubject">Disciplina Escolar</label>
+                                    <select id="reportSubject" required>
+                                        <option value="Matemática">Matemática</option>
+                                        <option value="Português">Português</option>
+                                        <option value="Inglês">Inglês</option>
+                                        <option value="Outra">Outra</option>
+                                    </select>
+                                </div>
+                                <div class="form-section">
+                                    <label for="reportGrade">Nota (0-10)</label>
+                                    <input type="number" id="reportGrade" min="0" max="10" step="0.1" required>
+                                </div>
+                            </div>
+                            <div class="form-section">
+                                <label for="reportFile">Anexar Boletim (Foto)</label>
+                                <input type="file" id="reportFile" accept="image/*,.pdf">
+                            </div>
+                            <button type="submit" class="btn">Adicionar Boletim Escolar</button>
+                        </form>
+                        <div class="history-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Histórico de Boletins</h4>
+                                <select id="filterReports" class="form-input" style="width: auto; padding: 5px;">
+                                    <option value="all">Todas</option>
+                                    <option value="Matemática">Matemática</option>
+                                    <option value="Português">Português</option>
+                                    <option value="Inglês">Inglês</option>
+                                </select>
+                            </div>
+                            <div id="reportHistory" class="history-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="tab-performance" class="tab-content active">
+                        <h3>⚡ Folha de Registro (Desempenho Diário)</h3>
+                        <form id="performanceForm" class="inline-form">
+                            <div class="grid-3-col">
+                                <div class="form-section">
+                                    <label for="performanceDate">Data</label>
+                                    <input type="date" id="performanceDate" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="performanceSubject">Disciplina</label>
+                                    <select id="performanceSubject" required>
+                                        <option value="Matemática">Matemática</option>
+                                        <option value="Português">Português</option>
+                                        <option value="Inglês">Inglês</option>
+                                    </select>
+                                </div>
+                                 <div class="form-section">
+                                    <label for="performanceBlock">Bloco/Páginas</label>
+                                    <input type="text" id="performanceBlock" placeholder="Ex: D1-D10 (10p)" required>
+                                </div>
+                            </div>
+                            <div class="grid-3-col">
+                                <div class="form-section">
+                                    <label for="performanceTimeGoal">Tempo Previsto (min)</label>
+                                    <input type="number" id="performanceTimeGoal" placeholder="Ex: 20">
+                                </div>
+                                <div class="form-section">
+                                    <label for="performanceTimeTaken">Tempo Realizado (min)</label>
+                                    <input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required>
+                                </div>
+                                <div class="form-section">
+                                    <label for="performanceGradeKumon">Nota / Conceito</label>
+                                    <select id="performanceGradeKumon" required>
+                                        <option value="100%">100% (Ótimo)</option>
+                                        <option value="95-99%">95-99% (Bom)</option>
+                                        <option value="90-94%">90-94% (Bom)</option>
+                                        <option value="80-89%">80-89% (Regular)</option>
+                                        <option value="<80%">< 80% (Atenção)</option>
+                                        <option value="REPETIR">REPETIR (Refazer)</option>
+                                        <option value="ELOGIO">ELOGIO (Comportamento)</option>
+                                        <option value="ALERTA">ALERTA (Comportamento)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn">Adicionar Registro</button>
+                        </form>
+                        
+                        <div class="button-container" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <button id="openTaskAnalysisBtn" type="button" class="btn btn-danger" style="background-color: var(--warning); color: #333;">
+                                <i class='bx bx-images'></i> Analisar Tarefas (IA Foto)
+                            </button>
+                        </div>
+
+                        <div class="history-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Histórico de Registros</h4>
+                                <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
+                                    <option value="all">Todas as Matérias</option>
+                                    <option value="Matemática">Matemática</option>
+                                    <option value="Português">Português</option>
+                                    <option value="Inglês">Inglês</option>
+                                </select>
+                            </div>
+                            <div id="performanceHistory" class="history-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="tab-analysis" class="tab-content">
+                        <h3>🤖 Última Análise de Reunião (IA Áudio)</h3>
+                        <div class="analysis-section">
+                            <div class="analysis-header">
+                                <p>💡 <strong>Relatório JSON da última reunião salva:</strong></p>
+                            </div>
+                            <pre id="student-analysis-content" class="analysis-content">Nenhum relatório de reunião (com IA) salvo para este aluno.</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveStudentBtn" class="btn">💾 Salvar Aluno</button>
+                <button id="deleteStudentBtn" class="btn btn-danger">🗑️ Excluir Aluno</button>
             </div>
         </div>
     </div>
 
-    <div id="reportModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h2 id="reportModalTitle">Relatório da Reunião</h2>
-                <button id="closeReportModalBtn" class="close-btn">&times;</button>
-            </div>
-            <div id="reportModalBody" class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                </div>
-        </div>
-    </div>
-
-    <div id="dashboardModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 900px;">
-            <div class="modal-header">
-                <h2>Dashboard Geral da Unidade</h2>
-                <button id="closeDashboardBtn" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <div class="kpi-container">
-                    <div class="kpi-card">
-                        <span id="kpiTotalAlunos" class="kpi-number">0</span>
-                        <span class="kpi-label">Total de Alunos</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span id="kpiAlunosMat" class="kpi-number">0</span>
-                        <span class="kpi-label">Alunos em Mat</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span id="kpiAlunosPort" class="kpi-number">0</span>
-                        <span class="kpi-label">Alunos em Port</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span id="kpiAlunosEng" class="kpi-number">0</span>
-                        <span class="kpi-label">Alunos em Inglês</span>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="stageChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <div id="brainModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
@@ -358,7 +471,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="taskAnalysisModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
@@ -378,7 +491,7 @@
                     
                     <fieldset>
                         <legend>2. Processamento</legend>
-                        <button type="submit" id="startTaskAnalysisBtn" class="btn btn-primary">
+                        <button type="submit" id="startTaskAnalysisBtn" class="btn">
                             <i class='bx bx-images'></i> Iniciar Análise da Fila
                         </button>
                         
@@ -401,8 +514,7 @@
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script> 
     
     <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
-
+    <script src="js/auth.js"></script>
 </body>
 </html>
