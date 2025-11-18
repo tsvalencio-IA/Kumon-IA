@@ -27,7 +27,7 @@
         .subject-Inglês { background-color: #f59e0b; }
         .subject-Outra { background-color: #888; }
         
-        /* NOVO (V3): Estilos para o progresso da fila de imagens */
+        /* V3: Estilos para o progresso da fila de imagens */
         #taskAnalysisProgress {
             width: 100%;
             height: 25px;
@@ -50,6 +50,18 @@
             margin-top: 10px;
             font-weight: 600;
             color: var(--kumon-blue);
+        }
+        
+        /* V4: Área de Insights da Trajetória */
+        .trajectory-insight-box {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -278,10 +290,10 @@
 
                 <div class="tabs-container">
                     <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="performance">⚡ Folha de Registro</button>
+                        <button class="tab-btn active" data-tab="performance">⚡ Boletim & Tarefas</button>
                         <button class="tab-btn" data-tab="programming">📅 Programação</button>
                         <button class="tab-btn" data-tab="reports">📊 Boletins Escolares</button>
-                        <button class="tab-btn" data-tab="analysis">🤖 Análise IA (Áudio)</button>
+                        <button class="tab-btn" data-tab="analysis">🤖 Histórico Reuniões</button>
                     </div>
                     
                     <div id="tab-programming" class="tab-content">
@@ -368,61 +380,26 @@
                     </div>
 
                     <div id="tab-performance" class="tab-content active">
-                        <h3>⚡ Folha de Registro (Desempenho Diário)</h3>
-                        <form id="performanceForm" class="inline-form">
-                            <div class="grid-3-col">
-                                <div class="form-section">
-                                    <label for="performanceDate">Data</label>
-                                    <input type="date" id="performanceDate" required>
-                                </div>
-                                <div class="form-section">
-                                    <label for="performanceSubject">Disciplina</label>
-                                    <select id="performanceSubject" required>
-                                        <option value="Matemática">Matemática</option>
-                                        <option value="Português">Português</option>
-                                        <option value="Inglês">Inglês</option>
-                                    </select>
-                                </div>
-                                 <div class="form-section">
-                                    <label for="performanceBlock">Bloco/Páginas</label>
-                                    <input type="text" id="performanceBlock" placeholder="Ex: D1-D10 (10p)" required>
-                                </div>
-                            </div>
-                            <div class="grid-3-col">
-                                <div class="form-section">
-                                    <label for="performanceTimeGoal">Tempo Previsto (min)</label>
-                                    <input type="number" id="performanceTimeGoal" placeholder="Ex: 20">
-                                </div>
-                                <div class="form-section">
-                                    <label for="performanceTimeTaken">Tempo Realizado (min)</label>
-                                    <input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required>
-                                </div>
-                                <div class="form-section">
-                                    <label for="performanceGradeKumon">Nota / Conceito</label>
-                                    <select id="performanceGradeKumon" required>
-                                        <option value="100%">100% (Ótimo)</option>
-                                        <option value="95-99%">95-99% (Bom)</option>
-                                        <option value="90-94%">90-94% (Bom)</option>
-                                        <option value="80-89%">80-89% (Regular)</option>
-                                        <option value="<80%">< 80% (Atenção)</option>
-                                        <option value="REPETIR">REPETIR (Refazer)</option>
-                                        <option value="ELOGIO">ELOGIO (Comportamento)</option>
-                                        <option value="ALERTA">ALERTA (Comportamento)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn">Adicionar Registro</button>
-                        </form>
+                        <h3>⚡ Folha de Registro & Tarefas</h3>
                         
-                        <div class="button-container" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                            <button id="openTaskAnalysisBtn" type="button" class="btn btn-danger" style="background-color: var(--warning); color: #333;">
-                                <i class='bx bx-images'></i> Analisar Tarefas (IA Foto)
+                        <div style="background: #eaf6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1px solid #d1e9f6;">
+                            <button id="openTaskAnalysisBtn" type="button" class="btn" style="flex: 1; background-color: #0078c1;">
+                                <i class='bx bx-camera'></i> Scanear Folha ou Tarefa (IA)
+                            </button>
+                            
+                            <button id="generateTrajectoryBtn" type="button" class="btn" style="flex: 1; background-color: #7e22ce;">
+                                <i class='bx bx-brain'></i> Gerar Análise de Trajetória (Pré-Reunião)
                             </button>
                         </div>
 
-                        <div class="history-section">
+                        <div id="trajectoryInsightArea" class="hidden">
+                            <h4>🧠 Análise Pré-Reunião (IA)</h4>
+                            <div id="trajectoryContent" class="trajectory-insight-box"></div>
+                        </div>
+
+                        <div class="history-section" style="margin-top: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4>Histórico de Registros</h4>
+                                <h4>Histórico de Tarefas (Boletim)</h4>
                                 <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
                                     <option value="Matemática">Matemática</option>
@@ -432,6 +409,52 @@
                             </div>
                             <div id="performanceHistory" class="history-list"></div>
                         </div>
+                        
+                        <hr style="margin: 20px 0; border-color: #eee;">
+                        
+                        <details>
+                            <summary style="cursor:pointer; color: #888;">Adicionar Registro Manualmente</summary>
+                            <form id="performanceForm" class="inline-form" style="margin-top: 10px;">
+                                <div class="grid-3-col">
+                                    <div class="form-section">
+                                        <label for="performanceDate">Data</label>
+                                        <input type="date" id="performanceDate" required>
+                                    </div>
+                                    <div class="form-section">
+                                        <label for="performanceSubject">Disciplina</label>
+                                        <select id="performanceSubject" required>
+                                            <option value="Matemática">Matemática</option>
+                                            <option value="Português">Português</option>
+                                            <option value="Inglês">Inglês</option>
+                                        </select>
+                                    </div>
+                                     <div class="form-section">
+                                        <label for="performanceBlock">Bloco/Folha</label>
+                                        <input type="text" id="performanceBlock" placeholder="Ex: 2A 100" required>
+                                    </div>
+                                </div>
+                                <div class="grid-3-col">
+                                    <div class="form-section">
+                                        <label for="performanceTimeGoal">Tempo Padrão (SCT)</label>
+                                        <input type="number" id="performanceTimeGoal" placeholder="Ex: 20">
+                                    </div>
+                                    <div class="form-section">
+                                        <label for="performanceTimeTaken">Tempo Realizado</label>
+                                        <input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required>
+                                    </div>
+                                    <div class="form-section">
+                                        <label for="performanceGradeKumon">Nota / Conceito</label>
+                                        <select id="performanceGradeKumon" required>
+                                            <option value="100%">100% (Ótimo)</option>
+                                            <option value="80-99%">80-99% (Corrigido)</option>
+                                            <option value="<80%">< 80% (Repetir)</option>
+                                            <option value="Repetição">Repetição</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-small">Salvar Manual</button>
+                            </form>
+                        </details>
                     </div>
 
                     <div id="tab-analysis" class="tab-content">
@@ -475,24 +498,27 @@
     <div id="taskAnalysisModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h2>Analisar Tarefas com IA (Multimodal)</h2>
+                <h2>Scanner Inteligente Kumon (IA)</h2>
                 <button id="closeTaskAnalysisModalBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="taskAnalysisForm">
                     <fieldset>
-                        <legend>1. Upload das Imagens</legend>
+                        <legend>1. O que você está enviando?</legend>
+                        <p class="text-sm text-gray-500 mb-4">O sistema reconhece automaticamente: <br>
+                        <strong>- Folhas de Registro</strong> (Tabela com várias datas/notas).<br>
+                        <strong>- Tarefas Individuais/Testes</strong> (Página com círculo grande ou nota).
+                        </p>
                         <div class="form-group">
-                            <label for="taskFilesInput">Selecione as fotos das tarefas (boletins, folhas, etc.)</label>
+                            <label for="taskFilesInput">Selecione as fotos (Câmera ou Galeria):</label>
                             <input type="file" id="taskFilesInput" accept="image/*" multiple required>
-                            <p class="text-sm text-gray-500 mt-1">Você pode selecionar múltiplas imagens de uma vez.</p>
                         </div>
                     </fieldset>
                     
                     <fieldset>
                         <legend>2. Processamento</legend>
                         <button type="submit" id="startTaskAnalysisBtn" class="btn">
-                            <i class='bx bx-images'></i> Iniciar Análise da Fila
+                            <i class='bx bx-images'></i> Processar Imagens
                         </button>
                         
                         <div id="taskAnalysisStatusContainer" class="hidden" style="margin-top: 20px;">
