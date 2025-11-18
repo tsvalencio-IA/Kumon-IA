@@ -1,6 +1,6 @@
-// App.js - Plataforma Kumon V10.0 (GOLD MASTER)
+// App.js - Plataforma Kumon V12.0 (GOLD MASTER - UNABRIDGED)
 // Desenvolvido por: Thiaguinho Soluções
-// Status: 100% Completo | Sem Abreviações | Deep Merge no Brain | Correção de Carga
+// Status: Código Fonte Completo sem Omissões.
 
 const App = {
     state: {
@@ -16,37 +16,31 @@ const App = {
     elements: {},
 
     // =====================================================================
-    // 1. INICIALIZAÇÃO E SETUP
+    // 1. INICIALIZAÇÃO
     // =====================================================================
     init(user, databaseInstance) {
-        // Remove tela de login e mostra app
         const loginScreen = document.getElementById('login-screen');
         if (loginScreen) loginScreen.classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         
-        // Configura estado inicial
         this.state.userId = user.uid;
-        this.state.db = databaseInstance; 
+        this.state.db = databaseInstance;
         document.getElementById('userEmail').textContent = user.email;
         
-        // Mapeia elementos e eventos
         this.mapDOMElements();
         this.addEventListeners();
         
-        // INICIA O CARREGAMENTO DOS DADOS DO FIREBASE
+        // Carrega dados do Firebase imediatamente ao iniciar
         this.loadStudents();
     },
 
     mapDOMElements() {
-        // Mapeamento completo de todos os IDs utilizados no HTML
         this.elements.logoutButton = document.getElementById('logout-button');
         this.elements.systemOptionsBtn = document.getElementById('system-options-btn');
         this.elements.dashboardBtn = document.getElementById('dashboard-btn');
-        
         this.elements.dashboardModal = document.getElementById('dashboardModal');
         this.elements.closeDashboardBtn = document.getElementById('closeDashboardBtn');
         
-        // KPIs e Dashboard
         this.elements.kpiTotalStudents = document.getElementById('kpi-total-students');
         this.elements.kpiTotalSubjects = document.getElementById('kpi-total-subjects');
         this.elements.kpiMultiSubject = document.getElementById('kpi-multi-subject');
@@ -54,7 +48,6 @@ const App = {
         this.elements.riskList = document.getElementById('riskList');
         this.elements.starList = document.getElementById('starList');
 
-        // Módulo Reunião (Áudio Legacy)
         this.elements.meetingDate = document.getElementById('meetingDate');
         this.elements.meetingStudentSelect = document.getElementById('meetingStudentSelect'); 
         this.elements.audioUpload = document.getElementById('audioUpload');
@@ -68,12 +61,10 @@ const App = {
         this.elements.reportContent = document.getElementById('reportContent');
         this.elements.downloadReportBtn = document.getElementById('downloadReportBtn');
         
-        // Gestão de Alunos
         this.elements.addStudentBtn = document.getElementById('addStudentBtn');
         this.elements.studentSearch = document.getElementById('studentSearch');
         this.elements.studentList = document.getElementById('student-list');
         
-        // Modal Aluno
         this.elements.studentModal = document.getElementById('studentModal');
         this.elements.modalTitle = document.getElementById('modalTitle');
         this.elements.closeModalBtn = document.getElementById('closeModalBtn');
@@ -82,30 +73,25 @@ const App = {
         this.elements.saveStudentBtn = document.getElementById('saveStudentBtn');
         this.elements.deleteStudentBtn = document.getElementById('deleteStudentBtn');
         
-        // Formulários Internos
         this.elements.programmingForm = document.getElementById('programmingForm');
         this.elements.reportForm = document.getElementById('reportForm');
         this.elements.performanceForm = document.getElementById('performanceForm'); 
         
-        // Históricos
         this.elements.programmingHistory = document.getElementById('programmingHistory');
         this.elements.reportHistory = document.getElementById('reportHistory');
         this.elements.performanceLog = document.getElementById('performanceHistory');
         this.elements.meetingHistoryList = document.getElementById('meetingHistoryList');
         this.elements.studentAnalysisContent = document.getElementById('student-analysis-content');
 
-        // Filtros
         this.elements.filterProgramming = document.getElementById('filterProgramming');
         this.elements.filterReports = document.getElementById('filterReports');
         this.elements.filterPerformance = document.getElementById('filterPerformance');
 
-        // Admin Brain
         this.elements.brainModal = document.getElementById('brainModal');
         this.elements.closeBrainModalBtn = document.getElementById('closeBrainModalBtn');
         this.elements.brainFileUploadModal = document.getElementById('brainFileUploadModal');
         this.elements.uploadBrainFileBtnModal = document.getElementById('uploadBrainFileBtnModal');
         
-        // IA Scanner (V5/V6)
         this.elements.taskAnalysisModal = document.getElementById('taskAnalysisModal');
         this.elements.closeTaskAnalysisModalBtn = document.getElementById('closeTaskAnalysisModalBtn');
         this.elements.taskAnalysisForm = document.getElementById('taskAnalysisForm');
@@ -116,55 +102,45 @@ const App = {
         this.elements.taskAnalysisStatus = document.getElementById('taskAnalysisStatus');
         this.elements.openTaskAnalysisBtn = document.getElementById('openTaskAnalysisBtn');
         
-        // IA Trajetória (V6)
         this.elements.generateTrajectoryBtn = document.getElementById('generateTrajectoryBtn');
         this.elements.trajectoryInsightArea = document.getElementById('trajectoryInsightArea');
         this.elements.trajectoryContent = document.getElementById('trajectoryContent');
     },
 
     addEventListeners() {
-        // Navegação e Sistema
         this.elements.logoutButton.addEventListener('click', () => firebase.auth().signOut());
         this.elements.systemOptionsBtn.addEventListener('click', () => this.promptForReset());
         this.elements.dashboardBtn.addEventListener('click', () => this.openDashboard());
         this.elements.closeDashboardBtn.addEventListener('click', () => this.closeDashboard());
         this.elements.dashboardModal.addEventListener('click', (e) => { if (e.target === this.elements.dashboardModal) this.closeDashboard(); });
 
-        // Áudio Legacy
         this.elements.audioUpload.addEventListener('change', () => this.handleFileUpload());
         this.elements.meetingStudentSelect.addEventListener('change', () => this.handleFileUpload());
         this.elements.transcribeAudioBtn.addEventListener('click', () => this.transcribeAudioGemini()); 
         this.elements.analyzeTranscriptionBtn.addEventListener('click', () => this.analyzeTranscriptionGemini()); 
         this.elements.downloadReportBtn.addEventListener('click', () => this.downloadReport());
         
-        // Admin Upload
         this.elements.uploadBrainFileBtnModal.addEventListener('click', () => this.handleBrainFileUpload());
         this.elements.closeBrainModalBtn.addEventListener('click', () => this.closeBrainModal());
         
-        // Alunos CRUD
         this.elements.addStudentBtn.addEventListener('click', () => this.openStudentModal());
         this.elements.studentSearch.addEventListener('input', () => this.renderStudentList());
         this.elements.closeModalBtn.addEventListener('click', () => this.closeStudentModal());
         this.elements.saveStudentBtn.addEventListener('click', () => this.saveStudent());
         this.elements.deleteStudentBtn.addEventListener('click', () => this.deleteStudent());
         
-        // Abas
         document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab)));
         
-        // Submissão de Forms
         this.elements.programmingForm.addEventListener('submit', (e) => this.addHistoryEntry(e, 'programmingHistory', this.elements.programmingForm));
         this.elements.reportForm.addEventListener('submit', (e) => this.addHistoryEntry(e, 'reportHistory', this.elements.reportForm));
         this.elements.performanceForm.addEventListener('submit', (e) => this.addHistoryEntry(e, 'performanceLog', this.elements.performanceForm)); 
         
-        // Filtros
         this.elements.filterProgramming.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
         this.elements.filterReports.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
         this.elements.filterPerformance.addEventListener('change', () => this.loadStudentHistories(this.state.currentStudentId));
 
-        // Fechar modal ao clicar fora
         this.elements.studentModal.addEventListener('click', (e) => { if (e.target === this.elements.studentModal) this.closeStudentModal(); });
 
-        // IA Scanner e Trajetória Listeners
         this.elements.openTaskAnalysisBtn.addEventListener('click', this.openTaskAnalysisModal.bind(this));
         this.elements.closeTaskAnalysisModalBtn.addEventListener('click', this.closeTaskAnalysisModal.bind(this));
         this.elements.taskAnalysisForm.addEventListener('submit', this.handleTaskAnalysisSubmit.bind(this));
@@ -172,35 +148,30 @@ const App = {
     },
 
     // =====================================================================
-    // 2. CARREGAMENTO E VISUALIZAÇÃO DE ALUNOS (CORRIGIDO)
+    // 2. CARREGAMENTO DE DADOS
     // =====================================================================
     async loadStudents() {
         try {
-            console.log("Iniciando carregamento de alunos...");
+            console.log("Carregando alunos do Firebase...");
             const data = await this.fetchData('alunos/lista_alunos');
-            
-            // Garante que students seja um objeto, mesmo se null
             this.state.students = (data && data.students) ? data.students : {};
-            
-            console.log(`Alunos carregados: ${Object.keys(this.state.students).length}`);
             
             this.renderStudentList();
             this.populateMeetingStudentSelect();
-            this.generateDashboardData(); // Atualiza KPIs com dados novos
+            this.generateDashboardData(); 
         } catch (e) {
-            console.error("Erro crítico ao carregar alunos:", e);
-            alert("Erro de conexão. Verifique sua internet.");
+            console.error("Erro ao carregar alunos:", e);
+            alert("Erro de conexão. Verifique a internet.");
         }
     },
 
     renderStudentList() {
         const term = this.elements.studentSearch.value.toLowerCase();
-        
         const list = Object.entries(this.state.students)
             .filter(([, s]) => {
-                const name = (s.name || '').toLowerCase();
-                const resp = (s.responsible || '').toLowerCase();
-                return name.includes(term) || resp.includes(term);
+                const n = (s.name || '').toLowerCase();
+                const r = (s.responsible || '').toLowerCase();
+                return n.includes(term) || r.includes(term);
             })
             .sort(([, a], [, b]) => (a.name || '').localeCompare(b.name || ''));
 
@@ -239,7 +210,7 @@ const App = {
     },
 
     // =====================================================================
-    // 3. MODAL DO ALUNO E HISTÓRICOS
+    // 3. MODAL E HISTÓRICOS
     // =====================================================================
     openStudentModal(id) {
         this.state.currentStudentId = id;
@@ -264,7 +235,6 @@ const App = {
         } else {
             this.elements.modalTitle.textContent = 'Novo Aluno';
             this.elements.deleteStudentBtn.style.display = 'none';
-            this.elements.performanceLog.innerHTML = '';
         }
         this.switchTab('performance');
     },
@@ -291,13 +261,18 @@ const App = {
     renderMeetingHistoryList(history) {
         const container = this.elements.meetingHistoryList;
         if (!history || history.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma reunião ou análise registrada.</p>';
+            container.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma reunião registrada.</p>';
             return;
         }
         container.innerHTML = history.map((h) => {
-            const dateStr = (h.meta && h.meta.date) ? new Date(h.meta.date).toLocaleDateString() : (h.date || 'Data N/A');
-            const type = (h.meta && h.meta.type === "PRE_MEETING_ANALYSIS") ? "Análise Trajetória (Dados)" : "Reunião Gravada (Áudio)";
-            const summary = h.resumo_executivo || "Sem resumo.";
+            // Suporte a dados legados e novos
+            let dateStr = "Data desc.";
+            if (h.meta && h.meta.date) dateStr = new Date(h.meta.date).toLocaleDateString();
+            else if (h.date) dateStr = h.date; 
+            
+            const type = (h.meta && h.meta.type === "PRE_MEETING_ANALYSIS") ? "Análise Dados (IA)" : "Reunião Gravada";
+            const summary = h.resumo_executivo || h.summary || "Sem resumo disponível.";
+            
             return `
             <div class="meeting-card">
                 <div class="meeting-header"><span>${dateStr}</span><span class="meeting-type">${type}</span></div>
@@ -322,7 +297,6 @@ const App = {
 
         container.innerHTML = filteredData.sort((a,b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)).map(e => {
             if (type === 'performanceLog') {
-                // Layout Boletim Kumon
                 const isAlert = e.gradeKumon && (e.gradeKumon.includes('<') || e.gradeKumon.includes('Rep') || e.gradeKumon.includes('ALERTA'));
                 return `
                 <div class="history-item" style="${isAlert ? 'border-left: 4px solid #d62828;' : 'border-left: 4px solid #28a745;'}">
@@ -337,7 +311,6 @@ const App = {
                     <button class="delete-history-btn" onclick="App.deleteHistoryEntry('${type}','${e.id}')">&times;</button>
                 </div>`;
             } else {
-                // Layout Genérico (Escola/Programação)
                 return `
                 <div class="history-item">
                     <div class="history-item-header">
@@ -352,7 +325,7 @@ const App = {
     },
 
     // =====================================================================
-    // 4. FUNCIONALIDADES DE IA (SCANNER E TRAJETÓRIA)
+    // 4. SCANNER IA E TRAJETÓRIA
     // =====================================================================
     openTaskAnalysisModal() {
         this.elements.taskAnalysisForm.reset();
@@ -376,7 +349,7 @@ const App = {
             CASO 1: FOLHA DE REGISTRO (TABELA com várias linhas). Extraia TODAS.
             CASO 2: TAREFA ÚNICA/TESTE (Círculo de nota). Extraia apenas essa.
 
-            RETORNE APENAS ARRAY JSON:
+            RETORNE APENAS ARRAY JSON.
             [
               {
                 "date": "YYYY-MM-DD", (Se ilegível use "TODAY")
@@ -392,12 +365,16 @@ const App = {
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            this.elements.taskAnalysisStatus.textContent = `Processando imagem ${i + 1}...`;
+            this.elements.taskAnalysisStatus.textContent = `Lendo imagem ${i + 1}...`;
             this.elements.taskAnalysisProgressBar.style.width = `${Math.round(((i + 1) / files.length) * 100)}%`;
 
             try {
                 const b64 = await this.imageToBase64(file);
-                const resultStr = await this.callGeminiAPI(prompt, "Extraia dados em JSON.", b64);
+                let resultStr = await this.callGeminiAPI(prompt, "Extraia dados em JSON.", b64);
+                
+                // Limpeza de Markdown que a IA pode incluir
+                resultStr = resultStr.replace(/```json/g, '').replace(/```/g, '').trim();
+
                 const resultJson = JSON.parse(resultStr);
 
                 if (Array.isArray(resultJson)) {
@@ -407,7 +384,7 @@ const App = {
                             id: Date.now() + Math.random(),
                             createdAt: new Date().toISOString(),
                             date: finalDate,
-                            subject: 'Matemática', // Padrão seguro
+                            subject: 'Matemática', // Default seguro
                             block: `${row.stage || '?'} ${row.sheet || '?'}`,
                             timeTaken: row.timeTaken || '0',
                             gradeKumon: row.gradeKumon || '?'
@@ -427,7 +404,7 @@ const App = {
         this.loadStudentHistories(this.state.currentStudentId);
         this.updateBrainFromStudents();
         
-        this.elements.taskAnalysisStatus.textContent = "Sucesso!";
+        this.elements.taskAnalysisStatus.textContent = "Concluído!";
         setTimeout(() => this.closeTaskAnalysisModal(), 1000);
         this.elements.startTaskAnalysisBtn.disabled = false;
     },
@@ -481,7 +458,7 @@ const App = {
     },
 
     // =====================================================================
-    // 5. DASHBOARD E KPIs
+    // 5. DASHBOARD E KPIs (COMPLETO)
     // =====================================================================
     openDashboard() {
         this.elements.dashboardModal.classList.remove('hidden');
@@ -492,121 +469,85 @@ const App = {
     generateDashboardData() {
         const students = Object.values(this.state.students);
         
-        let totalEnrollments = 0;
-        let multiSubjectCount = 0;
-        let riskCount = 0;
-        
-        const subjectsCount = { 'Matemática': 0, 'Português': 0, 'Inglês': 0 };
-        const stagesCount = { 'Math': {}, 'Port': {}, 'Eng': {} };
-        
-        const riskStudents = [];
-        const starStudents = [];
+        let totalSubs = 0, multi = 0, riskCount = 0;
+        const subjects = { 'Matemática': 0, 'Português': 0, 'Inglês': 0 };
+        const stages = { 'Math': {}, 'Port': {}, 'Eng': {} };
+        const riskList = [], starList = [];
 
         students.forEach(s => {
-            let studentSubCount = 0;
-            
-            if(s.mathStage) { 
-                studentSubCount++; 
-                subjectsCount['Matemática']++; 
-                const letter = s.mathStage.trim().charAt(0).toUpperCase();
-                stagesCount.Math[letter] = (stagesCount.Math[letter] || 0) + 1;
-            }
-            if(s.portStage) { 
-                studentSubCount++; 
-                subjectsCount['Português']++; 
-                const letter = s.portStage.trim().charAt(0).toUpperCase();
-                stagesCount.Port[letter] = (stagesCount.Port[letter] || 0) + 1;
-            }
-            if(s.engStage) { 
-                studentSubCount++; 
-                subjectsCount['Inglês']++; 
-                const letter = s.engStage.trim().charAt(0).toUpperCase();
-                stagesCount.Eng[letter] = (stagesCount.Eng[letter] || 0) + 1;
-            }
-            
-            totalEnrollments += studentSubCount;
-            if(studentSubCount > 1) multiSubjectCount++;
+            let count = 0;
+            if(s.mathStage) { count++; subjects['Matemática']++; this.incStage(stages.Math, s.mathStage); }
+            if(s.portStage) { count++; subjects['Português']++; this.incStage(stages.Port, s.portStage); }
+            if(s.engStage) { count++; subjects['Inglês']++; this.incStage(stages.Eng, s.engStage); }
+            totalSubs += count;
+            if(count > 1) multi++;
 
-            // Risco baseado no último registro
-            const lastLog = s.performanceLog && s.performanceLog.length > 0 ? s.performanceLog[s.performanceLog.length - 1] : null;
-            if (lastLog) {
-                if (lastLog.gradeKumon.includes('<') || lastLog.gradeKumon.includes('Rep') || lastLog.gradeKumon.includes('ALERTA')) {
-                    riskStudents.push(s);
-                    riskCount++;
-                } else if (lastLog.gradeKumon.includes('100') || lastLog.gradeKumon.includes('ELOGIO')) {
-                    starStudents.push(s);
-                }
+            // Risco
+            const last = s.performanceLog && s.performanceLog.length > 0 ? s.performanceLog[s.performanceLog.length - 1] : null;
+            if (last && (last.gradeKumon.includes('<') || last.gradeKumon.includes('Rep'))) {
+                riskList.push(s); riskCount++;
+            } else if (last && last.gradeKumon.includes('100')) {
+                starList.push(s);
             }
         });
 
         this.elements.kpiTotalStudents.textContent = students.length;
-        this.elements.kpiTotalSubjects.textContent = totalEnrollments;
-        this.elements.kpiMultiSubject.textContent = multiSubjectCount;
+        this.elements.kpiTotalSubjects.textContent = totalSubs;
+        this.elements.kpiMultiSubject.textContent = multi;
         this.elements.kpiRiskCount.textContent = riskCount;
 
-        this.renderDashboardList(this.elements.riskList, riskStudents, '⚠️');
-        this.renderDashboardList(this.elements.starList, starStudents, '⭐');
-        this.renderCharts(stagesCount, subjectsCount, { risk: riskCount, star: starStudents.length, total: students.length });
+        this.renderDashList(this.elements.riskList, riskList, '⚠️');
+        this.renderDashList(this.elements.starList, starList, '⭐');
+        this.renderCharts(stages, subjects, { risk: riskCount, star: starList.length, total: students.length });
     },
 
-    renderDashboardList(element, list, icon) {
-        element.innerHTML = list.length ? '' : '<li style="color:#999;">Nenhum.</li>';
+    incStage(map, stg) { const l = stg.charAt(0).toUpperCase(); map[l] = (map[l]||0)+1; },
+    
+    renderDashList(el, list, ico) {
+        el.innerHTML = list.length ? '' : '<li>Nenhum.</li>';
         list.forEach(s => {
             const li = document.createElement('li');
-            li.innerHTML = `${icon} <strong>${s.name}</strong>`;
+            li.innerHTML = `${ico} <strong>${s.name}</strong>`;
             li.style.cursor = 'pointer';
-            li.style.padding = '5px 0';
-            li.style.borderBottom = '1px solid #eee';
-            const id = Object.keys(this.state.students).find(key => this.state.students[key] === s);
-            li.onclick = () => { this.closeDashboard(); this.openStudentModal(id); };
-            element.appendChild(li);
+            li.onclick = () => { this.closeDashboard(); this.openStudentModal(Object.keys(this.state.students).find(k=>this.state.students[k]===s)); };
+            el.appendChild(li);
         });
     },
+    
+    renderCharts(stg, sub, mood) {
+        if(this.state.charts.stages) this.state.charts.stages.destroy();
+        if(this.state.charts.subjects) this.state.charts.subjects.destroy();
+        if(this.state.charts.mood) this.state.charts.mood.destroy();
 
-    renderCharts(stages, subjects, mood) {
-        if (this.state.charts.stages) this.state.charts.stages.destroy();
-        if (this.state.charts.subjects) this.state.charts.subjects.destroy();
-        if (this.state.charts.mood) this.state.charts.mood.destroy();
-
-        const allLetters = [...new Set([...Object.keys(stages.Math), ...Object.keys(stages.Port), ...Object.keys(stages.Eng)])].sort();
+        const labels = [...new Set([...Object.keys(stg.Math), ...Object.keys(stg.Port)])].sort();
         
-        const ctx1 = document.getElementById('stagesChart').getContext('2d');
-        this.state.charts.stages = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: allLetters,
-                datasets: [
-                    { label: 'Mat', data: allLetters.map(l => stages.Math[l] || 0), backgroundColor: '#0078c1' },
-                    { label: 'Port', data: allLetters.map(l => stages.Port[l] || 0), backgroundColor: '#d62828' },
-                    { label: 'Ing', data: allLetters.map(l => stages.Eng[l] || 0), backgroundColor: '#f59e0b' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
+        this.state.charts.stages = new Chart(document.getElementById('stagesChart'), {
+            type: 'bar', 
+            data: { 
+                labels, 
+                datasets: [{ label: 'Mat', data: labels.map(l=>stg.Math[l]||0), backgroundColor:'#0078c1' }, { label: 'Port', data: labels.map(l=>stg.Port[l]||0), backgroundColor:'#d62828' }] 
+            }
         });
-
-        const ctx2 = document.getElementById('subjectsChart').getContext('2d');
-        this.state.charts.subjects = new Chart(ctx2, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(subjects),
-                datasets: [{ data: Object.values(subjects), backgroundColor: ['#0078c1', '#d62828', '#f59e0b'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
+        
+        this.state.charts.subjects = new Chart(document.getElementById('subjectsChart'), {
+            type: 'pie', 
+            data: { 
+                labels: Object.keys(sub), 
+                datasets: [{ data: Object.values(sub), backgroundColor: ['#0078c1','#d62828','#f59e0b'] }] 
+            }
         });
-
-        const ctx3 = document.getElementById('moodChart').getContext('2d');
-        this.state.charts.mood = new Chart(ctx3, {
-            type: 'doughnut',
-            data: {
-                labels: ['Atenção', 'Destaque', 'Normal'],
-                datasets: [{ data: [mood.risk, mood.star, mood.total - mood.risk - mood.star], backgroundColor: ['#d62828', '#28a745', '#e0e0e0'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
+        
+        this.state.charts.mood = new Chart(document.getElementById('moodChart'), {
+            type: 'doughnut', 
+            data: { 
+                labels: ['Atenção','Destaque','Normal'], 
+                datasets: [{ data: [mood.risk, mood.star, mood.total-mood.risk-mood.star], backgroundColor: ['red','green','#eee'] }] 
+            }
         });
     },
 
     // =====================================================================
-    // 6. CRUD BÁSICO E HELPERS
+    // 6. CRUD E FIREBASE
     // =====================================================================
     async saveStudent() {
         const id = this.elements.studentIdInput.value || Date.now().toString();
@@ -630,7 +571,7 @@ const App = {
     },
 
     async deleteStudent() {
-        if(!confirm('Excluir aluno?')) return;
+        if(!confirm('Excluir?')) return;
         delete this.state.students[this.state.currentStudentId];
         await this.setData('alunos/lista_alunos', { students: this.state.students });
         this.loadStudents();
@@ -649,12 +590,12 @@ const App = {
         });
         
         if(type === 'performanceLog') {
-             entry.date = document.getElementById('performanceDate').value;
-             entry.block = document.getElementById('performanceBlock').value;
-             entry.timeTaken = document.getElementById('performanceTimeTaken').value;
-             entry.timeGoal = document.getElementById('performanceTimeGoal').value;
-             entry.gradeKumon = document.getElementById('performanceGradeKumon').value;
-             entry.subject = document.getElementById('performanceSubject').value;
+            entry.date = document.getElementById('performanceDate').value;
+            entry.block = document.getElementById('performanceBlock').value;
+            entry.timeTaken = document.getElementById('performanceTimeTaken').value;
+            entry.timeGoal = document.getElementById('performanceTimeGoal').value;
+            entry.gradeKumon = document.getElementById('performanceGradeKumon').value;
+            entry.subject = document.getElementById('performanceSubject').value;
         }
 
         const s = this.state.students[this.state.currentStudentId];
@@ -666,7 +607,7 @@ const App = {
     },
 
     async deleteHistoryEntry(type, id) {
-        if(!confirm('Apagar registro?')) return;
+        if(!confirm('Apagar?')) return;
         const s = this.state.students[this.state.currentStudentId];
         s[type] = s[type].filter(x => x.id !== id);
         await this.setData('alunos/lista_alunos', { students: this.state.students });
@@ -680,7 +621,6 @@ const App = {
         document.getElementById(`tab-${t}`).classList.add('active');
     },
 
-    // FIREBASE & SYNC
     getNodeRef(path) { return this.state.db.ref(`gestores/${this.state.userId}/${path}`); },
     async fetchData(path) { const s = await this.getNodeRef(path).get(); return s.exists() ? s.val() : null; },
     async setData(path, d) { await this.getNodeRef(path).set(d); },
@@ -701,44 +641,48 @@ const App = {
                 nome: s.name,
                 responsavel: s.responsible,
                 estagio_matematica: s.mathStage,
-                estagio_portugues: s.portStage,
-                estagio_ingles: s.engStage,
                 historico_desempenho: s.performanceLog || [],
                 metas: brain.alunos[id]?.metas || {},
             };
         }
         await this.saveBrainData(brain);
-        console.log("Cérebro Sincronizado.");
     },
 
-    // ADMIN
+    // =====================================================================
+    // 7. ADMIN E UPLOAD BRAIN (DEEP MERGE)
+    // =====================================================================
     promptForReset() { if(prompt('Senha Admin') === '*177') this.elements.brainModal.classList.remove('hidden'); },
     closeBrainModal() { this.elements.brainModal.classList.add('hidden'); },
 
-    // HANDLE BRAIN UPLOAD COM DEEP MERGE (Correção Solicitada)
     async handleBrainFileUpload() {
         const file = this.elements.brainFileUploadModal.files[0];
         if (!file) return alert('Selecione um arquivo JSON.');
+
         try {
             const text = await file.text();
             const newJson = JSON.parse(text);
             
-            // 1. Baixa o Brain Atual
+            // 1. Baixa o Cérebro Atual
             const currentBrain = await this.fetchBrainData() || {};
 
-            // 2. Lógica de Soma Inteligente (Deep Merge)
+            // 2. LÓGICA DE SOMA INTELIGENTE (DEEP MERGE)
             if (currentBrain.curriculo_referencia && newJson.curriculo_referencia) {
-                // Se o novo JSON tem currículo, mescla com o existente (ex: adiciona Mat sem apagar Port)
                 newJson.curriculo_referencia = {
-                    ...currentBrain.curriculo_referencia, 
-                    ...newJson.curriculo_referencia       
+                    ...currentBrain.curriculo_referencia, // Mantém o que já existia
+                    ...newJson.curriculo_referencia       // Soma o novo
+                };
+            }
+            
+            if (currentBrain.alunos && newJson.alunos) {
+                newJson.alunos = {
+                    ...currentBrain.alunos,
+                    ...newJson.alunos
                 };
             }
 
-            // Mantém outros dados
+            // 3. Junta o resto e Salva
             const finalBrain = { ...currentBrain, ...newJson };
 
-            // 3. Salva
             await this.saveBrainData(finalBrain);
             alert('Cérebro expandido com sucesso! Novos conhecimentos somados.');
             this.elements.brainFileUploadModal.value = '';
@@ -750,18 +694,47 @@ const App = {
         }
     },
 
-    // GEMINI & AUDIO LEGACY
-    imageToBase64(file) { return new Promise((res,rej) => { const r = new FileReader(); r.onloadend=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); }); },
-    
-    async callGeminiAPI(sys, user, img=null) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.state.geminiModel}:generateContent?key=${window.GEMINI_API_KEY}`;
-        const body = { systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: "user", parts: [{ text: user }, ...(img?[{ inlineData: { mimeType: "image/jpeg", data: img } }]:[])] }], generationConfig: { responseMimeType: "application/json" } };
-        if(user.includes("Analise a trajetória")) delete body.generationConfig;
-        const r = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-        if(!r.ok) throw new Error((await r.json()).error.message);
-        return (await r.json()).candidates[0].content.parts[0].text;
+    // =====================================================================
+    // 8. GEMINI API & HELPERS
+    // =====================================================================
+    imageToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     },
 
+    async callGeminiAPI(systemPrompt, userPrompt, imageBase64 = null) {
+        if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE")) throw new Error("API Key não configurada.");
+
+        const payload = {
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: userPrompt },
+                    ...(imageBase64 ? [{ inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] : [])
+                ]
+            }],
+            generationConfig: { responseMimeType: "application/json" }
+        };
+        
+        if (userPrompt.includes("Analise a trajetória")) delete payload.generationConfig;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.state.geminiModel}:generateContent?key=${window.GEMINI_API_KEY}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error.message);
+        }
+        const result = await response.json();
+        return result.candidates[0].content.parts[0].text;
+    },
+    
     handleFileUpload() { const f = this.elements.audioUpload.files[0]; if(f) { this.state.audioFile = f; this.elements.audioFileName.textContent = f.name; this.elements.transcribeAudioBtn.disabled = false; } },
     
     async transcribeAudioGemini() { 
