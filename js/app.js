@@ -1,7 +1,7 @@
 // App.js - Plataforma de Diário de Reuniões Kumon
-// VERSÃO 2.1 (MULTIMODAL - ANÁLISE DE TAREFAS + CORREÇÃO DE BUGS)
-// CORREÇÃO: Remove 'onclick' e adiciona listeners de abas no init.
-// CORREÇÃO: Adiciona lógica de Fila Multimodal (V2.1).
+// VERSÃO 2.0 (MULTIMODAL - ANÁLISE DE TAREFAS)
+// Esta versão adiciona a capacidade de analisar fotos de tarefas (boletins)
+// em uma fila, 100% client-side, e salvar os resultados.
 
 const App = {
     state: {
@@ -29,11 +29,12 @@ const App = {
         document.getElementById('userEmail').textContent = user.email;
 
         // NOVO (V2): Inicializa o modelo Gemini
-        // Usamos gemini-2.5-flash-preview-09-2025 (multimodal)
+        // NOTA: Isso assume que a API Key está no config.js e é válida
+        // Vamos usar o gemini-2.5-flash-preview-09-2025 pois ele é multimodal
         this.state.geminiModel = "gemini-2.5-flash-preview-09-2025"; 
 
         this.mapDOMElements();
-        this.addEventListeners(); // CORREÇÃO (V2.1): Os listeners são adicionados DEPOIS do login
+        this.addEventListeners();
         this.loadStudents();
     },
 
@@ -96,6 +97,7 @@ const App = {
 
             // Modal Relatório (Visualizar)
             reportModal: document.getElementById('reportModal'),
+            reportModalTitle: document.getElementById('reportModalTitle'), // ID Faltando na V1
             closeReportModalBtn: document.getElementById('closeReportModalBtn'),
             reportModalBody: document.getElementById('reportModalBody'),
             
@@ -113,19 +115,25 @@ const App = {
             taskAnalysisStatusContainer: document.getElementById('taskAnalysisStatusContainer'),
             taskAnalysisProgressBar: document.getElementById('taskAnalysisProgressBar'),
             taskAnalysisStatus: document.getElementById('taskAnalysisStatus'),
-            openTaskAnalysisBtn: document.getElementById('openTaskAnalysisBtn')
+            openTaskAnalysisBtn: document.getElementById('openTaskAnalysisBtn'),
+            
+            // KPIs do Dashboard
+            kpiTotalAlunos: document.getElementById('kpiTotalAlunos'),
+            kpiAlunosMat: document.getElementById('kpiAlunosMat'),
+            kpiAlunosPort: document.getElementById('kpiAlunosPort'),
+            kpiAlunosEng: document.getElementById('kpiAlunosEng')
         };
     },
 
     addEventListeners() {
         // Navegação
         this.elements.logoutButton.addEventListener('click', () => firebase.auth().signOut());
-        this.elements.dashboardBtn.addEventListener('click', this.openDashboardModal.bind(this));
+        this.elements.dashboardBtn.addEventListener('click', this.openDashboardModal.bind(this)); // Corrigido
         this.elements.closeDashboardBtn.addEventListener('click', this.closeDashboardModal.bind(this));
         this.elements.systemOptionsBtn.addEventListener('click', this.promptForReset.bind(this));
         
         // Alunos
-        this.elements.addStudentBtn.addEventListener('click', this.openStudentModal.bind(this));
+        this.elements.addStudentBtn.addEventListener('click', () => this.openStudentModal()); // Corrigido
         this.elements.closeStudentModalBtn.addEventListener('click', this.closeStudentModal.bind(this));
         this.elements.studentForm.addEventListener('submit', this.handleStudentSubmit.bind(this));
         this.elements.deleteStudentBtn.addEventListener('click', this.handleDeleteStudent.bind(this));
@@ -152,13 +160,6 @@ const App = {
         this.elements.openTaskAnalysisBtn.addEventListener('click', this.openTaskAnalysisModal.bind(this));
         this.elements.closeTaskAnalysisModalBtn.addEventListener('click', this.closeTaskAnalysisModal.bind(this));
         this.elements.taskAnalysisForm.addEventListener('submit', this.handleTaskAnalysisSubmit.bind(this));
-        
-        // CORREÇÃO (V2.1): Adiciona listeners para as ABAS aqui, em vez de inline
-        document.querySelectorAll('.tab-link').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.openTab(e, e.currentTarget.dataset.tab);
-            });
-        });
     },
 
     // =====================================================================
@@ -180,10 +181,10 @@ const App = {
             if (this.state.currentStudentId && this.state.students[this.state.currentStudentId]) {
                 this.displayStudentDetail(this.state.currentStudentId);
             } else if (this.state.currentStudentId) {
-                // O aluno selecionado foi excluído, volta para a tela de boas-vindas
+                // O aluno selecionado foi excluído, volta para a welcome screen
+                this.state.currentStudentId = null;
                 this.elements.welcomeScreen.classList.remove('hidden');
                 this.elements.studentDetail.classList.add('hidden');
-                this.state.currentStudentId = null;
             }
         });
     },
@@ -192,6 +193,7 @@ const App = {
         this.elements.studentList.innerHTML = '';
         const searchTerm = this.elements.studentSearch.value.toLowerCase();
         
+        // Ordena os alunos por nome
         const sortedStudents = Object.values(this.state.students)
             .filter(student => student.nome.toLowerCase().includes(searchTerm))
             .sort((a, b) => a.nome.localeCompare(b.nome));
@@ -241,12 +243,16 @@ const App = {
         this.renderHistory(this.elements.gradeHistory, student.historico_boletins, this.createGradeCard);
         this.renderHistory(this.elements.meetingHistory, student.meetingHistory, this.createMeetingCard.bind(this));
         
-        // NOVO (V2.1): Renderiza o log de performance
+        // NOVO (V2): Renderiza o log de performance
         this.renderHistory(this.elements.performanceLogContainer, student.performanceLog, this.createPerformanceLogItem);
 
-        // Ativa a aba principal (default 'tabBoletim')
+        // Ativa a aba principal
         this.openTab(null, 'tabBoletim');
-        
+        // Garante que a primeira aba esteja ativa visualmente
+        document.querySelectorAll('.tab-link').forEach(tab => tab.classList.remove('active'));
+        document.querySelector('.tab-link[onclick*="tabBoletim"]').classList.add('active');
+
+
         // Atualiza a lista de alunos para mostrar o 'active'
         this.renderStudentList();
         
@@ -261,13 +267,17 @@ const App = {
             return;
         }
         
+        // Converte o objeto de histórico em array e ordena (mais novo primeiro)
         const historyArray = Object.values(historyData).sort((a, b) => {
             const dateA = a.date || a.createdAt;
             const dateB = b.date || b.createdAt;
-            // Fallback para createdAt se a data for a mesma (para performanceLog)
-            if(dateA === dateB) return new Date(b.createdAt) - new Date(a.createdAt);
-            return new Date(b) - new Date(a); // Ordena por data
+            return new Date(dateB) - new Date(dateA);
         });
+
+        if (historyArray.length === 0) {
+            container.innerHTML = '<p class="empty-list">Nenhum registro encontrado.</p>';
+            return;
+        }
 
         historyArray.forEach(item => {
             const card = cardCreator(item);
@@ -290,7 +300,6 @@ const App = {
             this.elements.studentModalTitle.textContent = "Editar Aluno";
             this.elements.studentId.value = student.id;
             this.elements.studentName.value = student.nome;
-            // CORREÇÃO: Target dos elementos corretos
             document.getElementById('studentResponsible').value = student.responsavel || '';
             document.getElementById('studentContact').value = student.contact || '';
             this.elements.deleteStudentBtn.classList.remove('hidden');
@@ -320,7 +329,7 @@ const App = {
             // (Preserva históricos)
             historico_boletins: this.state.students[id]?.historico_boletins || {},
             meetingHistory: this.state.students[id]?.meetingHistory || {},
-            performanceLog: this.state.students[id]?.performanceLog || {} // (V2) Preserva o log
+            performanceLog: this.state.students[id]?.performanceLog || {}
         };
 
         this.getNodeRef(`alunos/lista_alunos/students/${id}`).set(studentData)
@@ -457,8 +466,6 @@ const App = {
         this.elements.meetingForm.reset();
         this.elements.analysisResult.innerHTML = "Aguardando geração da análise...";
         this.elements.generateAnalysisBtn.disabled = false;
-        this.elements.generateAnalysisBtn.textContent = "Gerar Análise";
-        this.elements.generateAnalysisBtn.classList.replace('btn-success', 'btn-primary');
         this.state.reportData = null;
         this.elements.meetingModal.classList.remove('hidden');
     },
@@ -515,7 +522,7 @@ const App = {
                 `;
 
                 // 6. Chama a API (V1 - Texto)
-                const responseText = await this.callGeminiAPI(systemPrompt, userPrompt, null);
+                const responseText = await this.callGeminiAPI(systemPrompt, userPrompt);
                 
                 // 7. Salva o resultado no estado
                 this.state.reportData = JSON.parse(responseText);
@@ -548,7 +555,7 @@ const App = {
             id: id,
             date: document.getElementById('meetingDate').value,
             transcription: document.getElementById('meetingTranscription').value,
-            createdAt: new Date().toISOString(), // Adicionado para ordenação
+            createdAt: new Date().toISOString(), // Adicionado
             ...this.state.reportData // Adiciona o JSON gerado pela IA
         };
 
@@ -577,6 +584,7 @@ const App = {
     
     openReportModal(report) {
         this.elements.reportModalTitle.textContent = `Relatório da Reunião (${report.date})`;
+        // Formata o JSON da IA para exibição
         const formattedReport = JSON.stringify(
             {
                 diagnostico_kumon: report.diagnostico_kumon,
@@ -586,15 +594,15 @@ const App = {
                 ajuste_programacao: report.ajuste_programacao
             }, 
             null, 
-            2
+            2 // Indentação de 2 espaços
         );
         
         this.elements.reportModalBody.innerHTML = `
             <h4>Transcrição Original:</h4>
-            <p class="report-transcription">${report.transcription}</p>
-            <hr>
+            <p class="report-transcription" style="white-space: pre-wrap; background: #f9f9f9; padding: 10px; border-radius: 5px;">${report.transcription}</p>
+            <hr style="margin: 15px 0;">
             <h4>Análise e Plano de Ação (IA):</h4>
-            <pre class="report-content">${formattedReport}</pre>
+            <pre class="report-content" style="background: #f0f8ff; padding: 10px; border-radius: 5px;">${formattedReport}</pre>
         `;
         this.elements.reportModal.classList.remove('hidden');
     },
@@ -647,11 +655,14 @@ const App = {
         }
     },
     
+    // Atualiza o 'brain' no Firebase com o brain.json local
+    // Esta é a função que sincroniza o Cérebro Dinâmico (Store 2)
     async updateBrainFromStudents() {
         console.log("Sincronizando Cérebro (Store 2)...");
         const students = this.state.students;
         const brainData = {};
 
+        // Formata os dados dos alunos para o cérebro
         Object.values(students).forEach(student => {
             brainData[student.id] = {
                 id: student.id,
@@ -659,6 +670,7 @@ const App = {
                 estagio_matematica: student.mathStage || null,
                 estagio_portugues: student.portStage || null,
                 estagio_ingles: student.engStage || null,
+                // (Adicionar mais KPIs se necessário)
             };
         });
 
@@ -670,6 +682,7 @@ const App = {
         }
     },
     
+    // Envia um NOVO brain.json para o Firebase
     handleBrainUploadModal() {
         const fileInput = document.getElementById('brainFileUploadModal');
         const file = fileInput.files[0];
@@ -682,6 +695,7 @@ const App = {
         reader.onload = (event) => {
             try {
                 const newBrainData = JSON.parse(event.target.result);
+                // ATENÇÃO: Isso substitui o nó 'brain' inteiro
                 this.getNodeRef('brain').set(newBrainData)
                     .then(() => {
                         alert("Cérebro da IA (brain.json) atualizado com sucesso!");
@@ -707,23 +721,26 @@ const App = {
     renderDashboardCharts() {
         const students = Object.values(this.state.students);
         
-        document.getElementById('kpiTotalAlunos').textContent = students.length;
-        document.getElementById('kpiAlunosMat').textContent = students.filter(s => s.mathStage).length;
-        document.getElementById('kpiAlunosPort').textContent = students.filter(s => s.portStage).length;
-        document.getElementById('kpiAlunosEng').textContent = students.filter(s => s.engStage).length;
+        // KPIs
+        this.elements.kpiTotalAlunos.textContent = students.length;
+        this.elements.kpiAlunosMat.textContent = students.filter(s => s.mathStage).length;
+        this.elements.kpiAlunosPort.textContent = students.filter(s => s.portStage).length;
+        this.elements.kpiAlunosEng.textContent = students.filter(s => s.engStage).length;
         
+        // Gráfico (Destrói gráfico antigo se existir)
         if (this.state.charts.stageChart) {
             this.state.charts.stageChart.destroy();
         }
         
+        // Mapeia estágios (simplificado)
         const stageMap = { 'Matemática': {}, 'Português': {}, 'Inglês': {} };
         students.forEach(s => {
             if(s.mathStage) {
-                const stage = s.mathStage.charAt(0);
+                const stage = s.mathStage.charAt(0); // Pega só a letra (A, B, C)
                 stageMap['Matemática'][stage] = (stageMap['Matemática'][stage] || 0) + 1;
             }
             if(s.portStage) {
-                const stage = s.portStage.replace(/[0-9]/g, '');
+                const stage = s.portStage.replace(/[0-9]/g, ''); // Pega só a letra (AI, AII, BI)
                 stageMap['Português'][stage] = (stageMap['Português'][stage] || 0) + 1;
             }
             if(s.engStage) {
@@ -736,7 +753,7 @@ const App = {
         this.state.charts.stageChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Object.keys(stageMap['Matemática']), 
+                labels: Object.keys(stageMap['Matemática']), // Mostra só matemática por padrão
                 datasets: [{
                     label: 'Nº de Alunos em Matemática por Estágio',
                     data: Object.values(stageMap['Matemática']),
@@ -756,11 +773,11 @@ const App = {
     },
     
     // =====================================================================
-    // ==================== LÓGICA DA IA (V1 e V2.1) =======================
+    // ==================== LÓGICA DA IA (V1 e V2) =========================
     // =====================================================================
 
     /**
-     * NOVO (V2.1): Converte um arquivo de imagem para Base64
+     * NOVO (V2): Converte um arquivo de imagem para Base64
      * @param {File} file - O arquivo de imagem do input
      * @returns {Promise<string>} - A string Base64 (sem o data-prefix)
      */
@@ -768,13 +785,9 @@ const App = {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                if (reader.result) {
-                    // Remove o prefixo "data:image/jpeg;base64,"
-                    const base64String = reader.result.split(',')[1];
-                    resolve(base64String);
-                } else {
-                    reject(new Error("Falha ao ler o arquivo."));
-                }
+                // Remove o prefixo "data:image/jpeg;base64,"
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
             };
             reader.onerror = (error) => reject(error);
             reader.readAsDataURL(file);
@@ -782,14 +795,18 @@ const App = {
     },
 
     /**
-     * ATUALIZADO (V2.1): Chama a API Gemini (Texto V1 ou Multimodal V2)
+     * ATUALIZADO (V2): Chama a API Gemini (Texto V1 ou Multimodal V2)
+     * @param {string} systemPrompt - O prompt de sistema (contexto)
+     * @param {string} userPrompt - O prompt do usuário (dados)
+     * @param {string | null} imageBase64 - (Opcional V2) A imagem em Base64
+     * @returns {Promise<string>} - A resposta em texto (JSON) da IA
      */
     async callGeminiAPI(systemPrompt, userPrompt, imageBase64 = null) {
-        if (!GEMINI_API_KEY || GEMINI_API_KEY === "COLE_SUA_CHAVE_GEMINI_AQUI") {
+        if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY.includes("COLE_SUA_CHAVE")) {
             throw new Error("Chave da API Gemini não configurada em js/config.js");
         }
 
-        const apiKey = GEMINI_API_KEY;
+        const apiKey = window.GEMINI_API_KEY;
         const model = this.state.geminiModel; // gemini-2.5-flash-preview-09-2025
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
@@ -866,7 +883,7 @@ const App = {
     },
 
     // =====================================================================
-    // ================= NOVO (V2.1): Análise de Tarefas (IA Multimodal) =====
+    // ================= NOVO (V2): Análise de Tarefas (IA Multimodal) =====
     // =====================================================================
 
     openTaskAnalysisModal() {
@@ -886,7 +903,7 @@ const App = {
     },
 
     /**
-     * NOVO (V2.1): Lida com o submit do form de análise de tarefas
+     * NOVO (V2): Lida com o submit do form de análise de tarefas
      */
     async handleTaskAnalysisSubmit(e) {
         e.preventDefault();
@@ -1004,20 +1021,25 @@ const App = {
     },
     
     /**
-     * NOVO (V2.1): Cria o item de UI para o Log de Performance
+     * NOVO (V2): Cria o item de UI para o Log de Performance
      */
     createPerformanceLogItem(item) {
         const el = document.createElement('div');
         el.className = 'log-item';
+        // Define a cor da nota
+        let notaColor = 'var(--text-color)';
+        if (item.nota === '100') notaColor = 'var(--success)';
+        if (item.nota === 'C' || item.observacao?.includes('REPETIÇÃO')) notaColor = 'var(--kumon-red)';
+
         el.innerHTML = `
             <span class="log-item-date">${item.data || 'N/A'}</span>
             <div class="log-item-details">
                 <span>${item.estagio || '?'} - ${item.folha || '?'}</span>
                 <span class="log-time"><i class='bx bx-time-five'></i> ${item.tempoTotal || 'N/A'}</span>
-                <span class="log-note"><i class='bx bx-check-double'></i> ${item.nota || 'N/A'}</span>
+                <span class="log-note" style="color: ${notaColor}; font-weight: bold;"><i class='bx bx-check-double'></i> ${item.nota || 'N/A'}</span>
             </div>
-            ${item.observacao ? `<span class="log-item-obs">${item.observacao}</span>` : ''}
         `;
+        // (Opcional: Adicionar um clique para ver a imagem original)
         return el;
     },
 
@@ -1026,7 +1048,6 @@ const App = {
     // ======================== UTILIDADES (Abas, etc) =====================
     // =====================================================================
 
-    // CORREÇÃO (V2.1): A função agora é chamada pelos listeners, não inline.
     openTab(evt, tabName) {
         let i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
@@ -1037,17 +1058,9 @@ const App = {
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].classList.remove("active");
         }
-        
-        const tabElement = document.getElementById(tabName);
-        if (tabElement) {
-            tabElement.classList.add("active");
-        }
-        
-        // Se o evento for nulo (chamada inicial), ativa o primeiro botão
+        document.getElementById(tabName).classList.add("active");
         if (evt) {
             evt.currentTarget.classList.add("active");
-        } else {
-            document.querySelector('.tab-link[data-tab="tabBoletim"]').classList.add('active');
         }
     }
 };
