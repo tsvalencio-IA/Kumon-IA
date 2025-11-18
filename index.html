@@ -12,28 +12,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Estilos Originais do ZIP */
+        /* Estilos Originais */
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
         .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Estilos para Badges */
         .subject-badge { color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
         .subject-Matemática { background-color: #0078c1; }
         .subject-Português { background-color: #d62828; }
         .subject-Inglês { background-color: #f59e0b; }
         .subject-Outra { background-color: #888; }
         
-        /* Novos Estilos (Scanner e Trajetória) */
+        /* Estilos Novos (Scanner) */
         #taskAnalysisProgress { width: 100%; height: 25px; background-color: #e9ecef; border-radius: 5px; overflow: hidden; margin-top: 10px; }
         #taskAnalysisProgressBar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease; text-align: center; line-height: 25px; color: white; font-weight: 600; }
         #taskAnalysisStatus { margin-top: 10px; font-weight: 600; color: var(--kumon-blue); }
         .trajectory-insight-box { background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 0.95em; line-height: 1.5; white-space: pre-wrap; }
         
-        /* Card de Histórico */
+        /* Card Histórico */
         .meeting-card { background: white; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #0078c1; }
-        .meeting-header { font-weight: bold; margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 0.9em; color: #555; }
+        .meeting-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 0.9em; }
     </style>
 </head>
 <body id="app-page">
@@ -67,9 +65,7 @@
                         <button id="dashboard-btn" class="options-btn" style="border-color: var(--kumon-blue); color: var(--kumon-blue);">
                             <i class='bx bxs-dashboard'></i> <span>Dashboard Geral</span>
                         </button>
-                        <button id="system-options-btn" class="options-btn" title="Opções de sistema (Admin)">
-                            <i class='bx bx-cog'></i>
-                        </button>
+                        <button id="system-options-btn" class="options-btn"><i class='bx bx-cog'></i></button>
                         <button id="logout-button" class="logout-btn">Sair</button>
                     </div>
                 </div>
@@ -79,7 +75,6 @@
         <main>
             <fieldset id="meetingsModule">
                 <legend>Diário de Reuniões de Pais (Análise de Áudio)</legend>
-                
                 <div class="grid-2-col">
                     <div class="form-section">
                         <label for="meetingDate">📅 Data da Reunião</label>
@@ -92,30 +87,26 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-section">
                     <label for="audioUpload">📤 Enviar Áudio Gravado (Galeria)</label>
                     <input type="file" id="audioUpload" accept="audio/*">
                     <p id="audioFileName" class="text-sm text-gray-500 mt-1"></p>
                 </div>
-                
                 <hr style="margin: 1rem 0;">
-
                 <div class="form-section">
                     <label for="additionalNotes">📝 Notas Adicionais (Opcional)</label>
-                    <textarea id="additionalNotes" rows="3" placeholder="Observações sobre a reunião..."></textarea>
+                    <textarea id="additionalNotes" rows="3"></textarea>
                 </div>
-                
                 <div class="button-container">
                     <button id="transcribeAudioBtn" class="btn" disabled>1. Transcrever Áudio (Gemini)</button>
                 </div>
             </fieldset>
 
             <fieldset id="transcriptionModule" class="section-box hidden">
-                <legend>🤖 Análise de Reunião (Áudio)</legend>
+                <legend>🤖 Análise de Reunião</legend>
                 <div class="form-section">
                     <label for="transcriptionOutput">📄 Transcrição Gerada</label>
-                    <textarea id="transcriptionOutput" rows="10" placeholder="Aguardando transcrição..."></textarea>
+                    <textarea id="transcriptionOutput" rows="10" placeholder="Aguardando..."></textarea>
                 </div>
                 <div class="button-container">
                     <button id="analyzeTranscriptionBtn" class="btn">2. Analisar Transcrição (Gemini)</button>
@@ -167,7 +158,7 @@
                     <div class="section-box" style="grid-column: span 2;"><h3>📈 Distribuição de Estágios</h3><div style="height: 300px; position: relative;"><canvas id="stagesChart"></canvas></div></div>
                 </div>
                 <div class="grid-2-col" style="margin-top: 20px;">
-                    <div class="section-box"><h3>🍰 Distribuição de Matrículas</h3><div style="height: 300px; position: relative;"><canvas id="subjectsChart"></canvas></div></div>
+                    <div class="section-box"><h3>🍰 Matrículas</h3><div style="height: 300px; position: relative;"><canvas id="subjectsChart"></canvas></div></div>
                     <div class="section-box"><h3>🌡️ Termômetro Emocional (IA)</h3><div style="height: 300px; position: relative;"><canvas id="moodChart"></canvas></div></div>
                 </div>
                 <div class="grid-2-col" style="margin-top: 20px;">
@@ -225,7 +216,7 @@
                         </div>
 
                         <div class="history-section">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h4>Histórico de Registros</h4>
                                 <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
                                     <option value="all">Todas as Matérias</option>
@@ -238,7 +229,7 @@
                         </div>
                         
                         <details style="margin-top: 20px;">
-                            <summary style="cursor:pointer; color: #888;">Adicionar Registro Manualmente</summary>
+                            <summary>Adicionar Registro Manualmente</summary>
                             <form id="performanceForm" class="inline-form" style="margin-top: 10px;">
                                 <div class="grid-3-col">
                                     <div class="form-section"><label for="performanceDate">Data</label><input type="date" id="performanceDate" required></div>
@@ -248,7 +239,7 @@
                                 <div class="grid-3-col">
                                     <div class="form-section"><label for="performanceTimeGoal">Meta (min)</label><input type="number" id="performanceTimeGoal" placeholder="Ex: 20"></div>
                                     <div class="form-section"><label for="performanceTimeTaken">Tempo (min)</label><input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required></div>
-                                    <div class="form-section"><label for="performanceGradeKumon">Nota</label><select id="performanceGradeKumon" required><option value="100%">100%</option><option value="95-99%">95-99%</option><option value="90-94%">90-94%</option><option value="80-89%">80-89%</option><option value="<80%">< 80%</option><option value="REPETIR">REPETIR</option></select></div>
+                                    <div class="form-section"><label for="performanceGradeKumon">Nota</label><select id="performanceGradeKumon" required><option value="100%">100%</option><option value="95-99%">95-99%</option><option value="90-94%">90-94%</option><option value="80-89%">80-89%</option><option value="<80%">< 80%</option><option value="REPETIR">REPETIR</option><option value="ELOGIO">ELOGIO</option><option value="ALERTA">ALERTA</option></select></div>
                                 </div>
                                 <button type="submit" class="btn">Adicionar Registro</button>
                             </form>
@@ -261,9 +252,9 @@
                             <div class="grid-3-col">
                                 <div class="form-section"><label for="programmingDate">Data</label><input type="date" id="programmingDate" required></div>
                                 <div class="form-section"><label for="programmingSubject">Disciplina</label><select id="programmingSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select></div>
-                                <div class="form-section"><label for="programmingMaterial">Bloco/Páginas</label><input type="text" id="programmingMaterial" required></div>
+                                <div class="form-section"><label for="programmingMaterial">Bloco/Páginas</label><input type="text" id="programmingMaterial" placeholder="Ex: D1-D10" required></div>
                             </div>
-                            <div class="form-section"><label for="programmingNotes">Observações</label><textarea id="programmingNotes" rows="2"></textarea></div>
+                            <div class="form-section"><label for="programmingNotes">Observações</label><textarea id="programmingNotes" rows="2" placeholder="Ex: Foco em operações básicas"></textarea></div>
                             <button type="submit" class="btn">Adicionar Programação</button>
                         </form>
                         <div class="history-section">
@@ -277,10 +268,10 @@
                         <form id="reportForm" class="inline-form">
                             <div class="grid-3-col">
                                 <div class="form-section"><label for="reportDate">Data</label><input type="date" id="reportDate" required></div>
-                                <div class="form-section"><label for="reportSubject">Disciplina</label><select id="reportSubject" required><option value="Matemática">Matemática</option><option value="Outra">Outra</option></select></div>
-                                <div class="form-section"><label for="reportGrade">Nota</label><input type="number" id="reportGrade" required></div>
+                                <div class="form-section"><label for="reportSubject">Disciplina Escolar</label><select id="reportSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option><option value="Outra">Outra</option></select></div>
+                                <div class="form-section"><label for="reportGrade">Nota</label><input type="number" id="reportGrade" min="0" max="10" step="0.1" required></div>
                             </div>
-                            <div class="form-section"><label for="reportFile">Anexar Boletim</label><input type="file" id="reportFile"></div>
+                            <div class="form-section"><label for="reportFile">Anexar Boletim</label><input type="file" id="reportFile" accept="image/*,.pdf"></div>
                             <button type="submit" class="btn">Adicionar Boletim Escolar</button>
                         </form>
                         <div class="history-section">
@@ -290,7 +281,7 @@
                     </div>
 
                     <div id="tab-analysis" class="tab-content">
-                        <h3>🤖 Histórico de Reuniões</h3>
+                        <h3>🤖 Histórico de Análises e Reuniões</h3>
                         <div id="meetingHistoryList" class="history-list"></div>
                         <pre id="student-analysis-content" class="hidden"></pre>
                     </div>
@@ -305,7 +296,10 @@
 
     <div id="brainModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header"><h2>🧠 Atualizar Cérebro da IA (Admin)</h2><button id="closeBrainModalBtn" class="close-btn">&times;</button></div>
+            <div class="modal-header">
+                <h2>🧠 Atualizar Cérebro da IA (Admin)</h2>
+                <button id="closeBrainModalBtn" class="close-btn">&times;</button>
+            </div>
             <div class="modal-body">
                 <fieldset>
                     <legend>Upload de Contexto</legend>
@@ -322,16 +316,26 @@
 
     <div id="taskAnalysisModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header"><h2>Scanner Inteligente (IA)</h2><button id="closeTaskAnalysisModalBtn" class="close-btn">&times;</button></div>
+            <div class="modal-header">
+                <h2>Scanner Inteligente Kumon (IA)</h2>
+                <button id="closeTaskAnalysisModalBtn" class="close-btn">&times;</button>
+            </div>
             <div class="modal-body">
                 <form id="taskAnalysisForm">
                     <fieldset>
-                        <legend>Upload</legend>
-                        <div class="form-group"><label for="taskFilesInput">Selecione fotos:</label><input type="file" id="taskFilesInput" accept="image/*" multiple required></div>
+                        <legend>Upload das Imagens</legend>
+                        <div class="form-group">
+                            <label for="taskFilesInput">Selecione as fotos das tarefas (boletins, folhas, etc.)</label>
+                            <input type="file" id="taskFilesInput" accept="image/*" multiple required>
+                        </div>
                     </fieldset>
+                    
                     <fieldset>
-                        <legend>Processamento</legend>
-                        <button type="submit" id="startTaskAnalysisBtn" class="btn"><i class='bx bx-images'></i> Processar</button>
+                        <legend>2. Processamento</legend>
+                        <button type="submit" id="startTaskAnalysisBtn" class="btn">
+                            <i class='bx bx-images'></i> Iniciar Análise da Fila
+                        </button>
+                        
                         <div id="taskAnalysisStatusContainer" class="hidden" style="margin-top: 20px;">
                             <div id="taskAnalysisStatus">Processando...</div>
                             <div id="taskAnalysisProgress"><div id="taskAnalysisProgressBar">0%</div></div>
