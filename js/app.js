@@ -1,5 +1,5 @@
-// App.js - Plataforma Kumon V50.0 (FINAL STABLE)
-// CORREÇÕES: Delete OK, Reset de Formulário OK, KPIs calibrados.
+// App.js - Plataforma Kumon V51.0 (COERÊNCIA MÁXIMA)
+// Status: [object Object] (FIXED), Delete OK, Lógica de Filtro OK.
 
 const App = {
     state: {
@@ -168,12 +168,11 @@ const App = {
     openStudentModal(id) {
         this.state.currentStudentId = id;
         this.elements.studentModal.classList.remove('hidden');
-        this.elements.studentForm.reset(); // Zera valores
+        this.elements.studentForm.reset(); 
 
         if (id) {
             const s = this.state.students[id];
             this.elements.modalTitle.textContent = s.name;
-            // Carrega dados
             document.getElementById('studentName').value = s.name || '';
             document.getElementById('studentResponsible').value = s.responsible || '';
             document.getElementById('studentContact').value = s.contact || '';
@@ -187,7 +186,7 @@ const App = {
             this.elements.trajectoryInsightArea.classList.add('hidden');
             this.elements.trajectoryContent.textContent = "";
         } else {
-            // FIX CRÍTICO: Garante que os campos fiquem vazios para "Novo Aluno"
+            // FIX CRÍTICO: Limpa todos os campos para NOVOS ALUNOS (evita vazamento de dados)
             document.getElementById('studentName').value = '';
             document.getElementById('studentResponsible').value = '';
             document.getElementById('studentContact').value = '';
@@ -236,13 +235,18 @@ const App = {
             return;
         }
         container.innerHTML = history.map((h, index) => {
-            const itemId = h.id || `hist-${index}`; // Garante ID
+            const itemId = h.id || `hist-${index}`; // Garante ID para delete
             let dateStr = "Data desc.";
             if (h.meta && h.meta.date) dateStr = new Date(h.meta.date).toLocaleDateString();
             else if (h.date) dateStr = h.date; 
             
             const type = (h.meta && h.meta.type === "PRE_MEETING_ANALYSIS") ? "Análise Dados (IA)" : "Reunião Gravada (Áudio)";
-            const summary = h.resumo_executivo || h.summary || "Sem resumo.";
+            
+            // CORREÇÃO CRÍTICA: Trata [object Object]
+            let summary = h.resumo_executivo || h.summary || "Sem resumo.";
+            if (typeof summary === 'object' && summary !== null) {
+                 summary = summary.resumo_executivo || JSON.stringify(summary, null, 2);
+            }
             
             return `
             <div class="meeting-card">
@@ -405,7 +409,7 @@ const App = {
             this.elements.trajectoryInsightArea.classList.remove('hidden');
 
             const analysisEntry = {
-                id: String(Date.now()) + Math.random(), // Garante ID String para o delete
+                id: String(Date.now()) + Math.random(),
                 meta: { date: new Date().toISOString(), type: "PRE_MEETING_ANALYSIS" },
                 resumo_executivo: text
             };
@@ -424,7 +428,7 @@ const App = {
     },
 
     // =====================================================================
-    // 5. DASHBOARD (KPIs CORRIGIDOS)
+    // 5. DASHBOARD E KPIS
     // =====================================================================
     openDashboard() {
         this.elements.dashboardModal.classList.remove('hidden');
@@ -459,12 +463,9 @@ const App = {
             if (last) {
                 const grade = String(last.gradeKumon).toUpperCase();
                 
-                // Risco: <80, REPETIR, ou ALERTA
                 if (grade.includes('<80') || grade.includes('REPETIR') || grade.includes('ALERTA') || parseInt(grade) < 80) {
                     riskStudents.push(s); riskCount++;
-                } 
-                // Destaque: 100% ou ELOGIO
-                else if (grade.includes('100') || grade.includes('ELOGIO') || parseInt(grade) >= 95) {
+                } else if (grade.includes('100') || grade.includes('ELOGIO') || parseInt(grade) >= 95) {
                     starStudents.push(s);
                 }
             }
@@ -601,7 +602,6 @@ const App = {
         const s = this.state.students[this.state.currentStudentId];
         
         if (s.meetingHistory) {
-            // Filtra pelo ID da análise
             s.meetingHistory = s.meetingHistory.filter(x => String(x.id) !== String(id));
         }
 
@@ -734,7 +734,15 @@ const App = {
     },
     
     async analyzeTranscriptionGemini() {
-        const t = this.elements.transcriptionOutput.value; const s = this.state.students[this.elements.meetingStudentSelect.value];
+        const t = this.elements.transcriptionOutput.value; 
+        const selectedStudentId = this.elements.meetingStudentSelect.value;
+        const s = this.state.students[selectedStudentId];
+
+        if (!s) {
+            alert("Erro: Selecione um aluno no dropdown 'Reunião Sobre'.");
+            return;
+        }
+
         this.elements.reportSection.classList.remove('hidden'); this.elements.reportContent.textContent = "Gerando...";
         try { 
             const analysisEntry = JSON.parse(await this.callGeminiAPI("JSON {resumo_executivo}", `Analise: ${t}. Aluno: ${s.name}`));
@@ -744,6 +752,13 @@ const App = {
             if(!s.meetingHistory) s.meetingHistory=[]; 
             s.meetingHistory.push(analysisEntry); 
             await this.setData('alunos/lista_alunos', { students: this.state.students }); 
+            
+            // Recarrega o histórico
+            const currentModalStudentId = this.state.currentStudentId;
+            if (currentModalStudentId) {
+                this.loadStudentHistories(currentModalStudentId);
+            }
+
         } catch(e) { alert(e.message); }
     },
     
