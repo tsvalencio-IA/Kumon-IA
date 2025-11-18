@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Diário de Reuniões - Método Kumon</title>
+    <title>Plataforma Kumon - Gestão Inteligente</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
@@ -12,30 +12,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Estilos Essenciais */
+        /* Estilos KPIs */
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
         .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
 
+        /* Badges e Listas */
         .subject-badge { color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
         .subject-Matemática { background-color: #0078c1; }
         .subject-Português { background-color: #d62828; }
         .subject-Inglês { background-color: #f59e0b; }
-        .subject-Outra { background-color: #888; }
         
         /* Scanner e IA */
-        #taskAnalysisProgress { width: 100%; height: 25px; background-color: var(--border-color); border-radius: 5px; overflow: hidden; margin-top: 10px; }
-        #taskAnalysisProgressBar { width: 0%; height: 100%; background-color: var(--success); transition: width 0.3s ease; text-align: center; line-height: 25px; color: white; font-weight: 600; }
-        #taskAnalysisStatus { margin-top: 10px; font-weight: 600; color: var(--kumon-blue); }
+        #taskAnalysisProgress { width: 100%; height: 25px; background-color: #e9ecef; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+        #taskAnalysisProgressBar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease; text-align: center; line-height: 25px; color: white; font-weight: 600; }
+        #taskAnalysisStatus { margin-top: 10px; font-weight: 600; color: #0078c1; }
         
         .trajectory-insight-box { background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 0.95em; line-height: 1.5; white-space: pre-wrap; }
-
-        /* Lista de Histórico */
-        .meeting-card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--kumon-blue); }
-        .meeting-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; color: var(--text-color); }
-        .meeting-summary { font-size: 0.9em; color: #555; white-space: pre-wrap; }
-        .meeting-type { font-size: 0.75em; text-transform: uppercase; background: #eee; padding: 2px 6px; border-radius: 4px; }
+        
+        /* Histórico de Reuniões */
+        .meeting-card { background: white; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #0078c1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .meeting-header { display: flex; justify-content: space-between; margin-bottom: 10px; color: #555; font-size: 0.9em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .meeting-body { color: #333; white-space: pre-wrap; line-height: 1.5; }
     </style>
 </head>
 <body id="app-page">
@@ -44,11 +43,11 @@
         <p class="text-lg font-semibold text-white text-center">Kumon</p>
         <form id="login-form" class="login-container mt-8 text-left" style="background-color: #1f2937;">
             <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
                 <input type="email" id="email" required class="form-input">
             </div>
             <div class="mb-6">
-                <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
                 <input type="password" id="password" required class="form-input">
             </div>
             <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded">Entrar</button>
@@ -60,14 +59,14 @@
         <header>
             <div class="header-content">
                 <div>
-                    <h1>Diário de Reuniões Kumon</h1>
-                    <p class="unit-name">Método Kumon - Gestão Inteligente</p>
+                    <h1>Diário Kumon</h1>
+                    <p class="unit-name">Gestão Inteligente da Unidade</p>
                 </div>
                 <div class="user-info">
                     <p id="userEmail" class="font-semibold"></p>
                     <div class="header-actions">
-                        <button id="dashboard-btn" class="options-btn" style="border-color: var(--kumon-blue); color: var(--kumon-blue);">
-                            <i class='bx bxs-dashboard'></i> <span>Dashboard</span>
+                        <button id="dashboard-btn" class="options-btn" style="border-color: #0078c1; color: #0078c1;">
+                            <i class='bx bxs-dashboard'></i> Dashboard
                         </button>
                         <button id="system-options-btn" class="options-btn"><i class='bx bx-cog'></i></button>
                         <button id="logout-button" class="logout-btn">Sair</button>
@@ -78,74 +77,72 @@
 
         <main>
             <fieldset id="meetingsModule">
-                <legend>Diário de Reuniões de Pais (Análise de Áudio)</legend>
+                <legend>Nova Reunião (Áudio)</legend>
                 <div class="grid-2-col">
-                    <div class="form-section"><label>📅 Data</label><input type="date" id="meetingDate"></div>
-                    <div class="form-section"><label>👨‍🎓 Aluno</label><select id="meetingStudentSelect" required><option value="" disabled selected>Selecione...</option></select></div>
+                    <div class="form-section"><label>Data</label><input type="date" id="meetingDate"></div>
+                    <div class="form-section"><label>Aluno</label><select id="meetingStudentSelect" required><option value="" disabled selected>Selecione...</option></select></div>
                 </div>
                 <div class="form-section">
-                    <label>📤 Enviar Áudio</label>
+                    <label>Áudio (Reunião/Obs)</label>
                     <input type="file" id="audioUpload" accept="audio/*">
                     <p id="audioFileName" class="text-sm text-gray-500 mt-1"></p>
                 </div>
                 <div class="form-section">
-                    <label>📝 Notas Adicionais</label>
+                    <label>Notas Rápidas</label>
                     <textarea id="additionalNotes" rows="2"></textarea>
                 </div>
                 <div class="button-container">
-                    <button id="transcribeAudioBtn" class="btn" disabled>1. Transcrever Áudio (Gemini)</button>
+                    <button id="transcribeAudioBtn" class="btn" disabled>1. Transcrever (Gemini)</button>
                 </div>
             </fieldset>
 
             <fieldset id="transcriptionModule" class="section-box hidden">
-                <legend>🤖 Análise de Reunião</legend>
-                <textarea id="transcriptionOutput" rows="5" placeholder="Aguardando..."></textarea>
-                <div class="button-container"><button id="analyzeTranscriptionBtn" class="btn">2. Analisar Transcrição</button></div>
+                <legend>Transcrição IA</legend>
+                <textarea id="transcriptionOutput" rows="6" placeholder="Texto transcrito aparecerá aqui..."></textarea>
+                <div class="button-container"><button id="analyzeTranscriptionBtn" class="btn">2. Analisar e Salvar</button></div>
             </fieldset>
 
             <fieldset id="studentsModule">
-                <legend>Gestão de Alunos Inteligente (Ficha de Aluno)</legend>
+                <legend>Gestão de Alunos</legend>
                 <div class="students-header">
-                    <div class="button-container"><button id="addStudentBtn" class="btn">👨‍🎓 Adicionar Novo Aluno</button></div>
+                    <div class="button-container"><button id="addStudentBtn" class="btn">Novo Aluno</button></div>
                     <div class="form-section">
-                        <label>🔍 Pesquisar Aluno</label>
-                        <input type="text" id="studentSearch" placeholder="Nome do aluno...">
+                        <label>Buscar</label>
+                        <input type="text" id="studentSearch" placeholder="Nome...">
                     </div>
                 </div>
                 <div id="student-list" class="student-list"></div>
             </fieldset>
 
             <section id="reportSection" class="section-box hidden">
-                <h2>📊 Relatório Final</h2>
+                <h2>Resultado da Análise</h2>
                 <div id="reportContent" class="report-content"></div>
-                <div class="button-container"><button id="downloadReportBtn" class="btn download-btn">Download Relatório</button></div>
+                <div class="button-container"><button id="downloadReportBtn" class="btn download-btn">Download JSON</button></div>
             </section>
         </main>
         
-        <footer>
-            <p>Desenvolvido com 🤖, por thIAguinho Soluções</p>
-        </footer>
+        <footer><p>Desenvolvido com 🤖, por thIAguinho Soluções</p></footer>
     </div>
 
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 1100px;">
-            <div class="modal-header"><h2>📊 Cérebro da Unidade</h2><button id="closeDashboardBtn" class="close-btn">&times;</button></div>
+            <div class="modal-header"><h2>Dashboard</h2><button id="closeDashboardBtn" class="close-btn">&times;</button></div>
             <div class="modal-body">
                 <div class="kpi-container">
-                    <div class="kpi-card"><span class="kpi-number" id="kpi-total-students">0</span><span class="kpi-label">Alunos Ativos</span></div>
+                    <div class="kpi-card"><span class="kpi-number" id="kpi-total-students">0</span><span class="kpi-label">Alunos</span></div>
                     <div class="kpi-card"><span class="kpi-number" id="kpi-total-subjects">0</span><span class="kpi-label">Matrículas</span></div>
-                    <div class="kpi-card"><span class="kpi-number" id="kpi-multi-subject">0</span><span class="kpi-label">Multi-Matérias</span></div>
-                    <div class="kpi-card" style="border-color: var(--kumon-red);"><span class="kpi-number" id="kpi-risk-count" style="color: var(--kumon-red);">0</span><span class="kpi-label">Em Atenção</span></div>
+                    <div class="kpi-card"><span class="kpi-number" id="kpi-multi-subject">0</span><span class="kpi-label">Multi</span></div>
+                    <div class="kpi-card" style="border-color: #d62828;"><span class="kpi-number" id="kpi-risk-count" style="color: #d62828;">0</span><span class="kpi-label">Atenção</span></div>
                 </div>
                 <div class="grid-2-col">
-                    <div class="section-box" style="grid-column: span 2;"><h3>📈 Estágios</h3><div style="height: 250px;"><canvas id="stagesChart"></canvas></div></div>
+                    <div class="section-box" style="grid-column: span 2;"><h3>Estágios</h3><div style="height:250px;"><canvas id="stagesChart"></canvas></div></div>
                 </div>
-                <div class="grid-2-col" style="margin-top: 20px;">
-                    <div class="section-box"><h3>🍰 Matrículas</h3><div style="height: 250px;"><canvas id="subjectsChart"></canvas></div></div>
-                    <div class="section-box"><h3>🌡️ Termômetro</h3><div style="height: 250px;"><canvas id="moodChart"></canvas></div></div>
+                <div class="grid-2-col" style="margin-top:20px;">
+                    <div class="section-box"><h3>Matérias</h3><div style="height:250px;"><canvas id="subjectsChart"></canvas></div></div>
+                    <div class="section-box"><h3>Status</h3><div style="height:250px;"><canvas id="moodChart"></canvas></div></div>
                 </div>
-                <div class="grid-2-col" style="margin-top: 20px;">
-                    <div class="section-box"><h3>⚠️ Em Atenção</h3><ul id="riskList"></ul></div>
+                <div class="grid-2-col" style="margin-top:20px;">
+                    <div class="section-box"><h3>⚠️ Atenção</h3><ul id="riskList"></ul></div>
                     <div class="section-box"><h3>⭐ Destaque</h3><ul id="starList"></ul></div>
                 </div>
             </div>
@@ -154,7 +151,7 @@
 
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="modalTitle">📋 Ficha do Aluno</h2><button id="closeModalBtn" class="close-btn">&times;</button></div>
+            <div class="modal-header"><h2 id="modalTitle">Ficha do Aluno</h2><button id="closeModalBtn" class="close-btn">&times;</button></div>
             <div class="modal-body">
                 <form id="studentForm">
                     <input type="hidden" id="studentId">
@@ -174,47 +171,38 @@
                     <div class="tabs-header">
                         <button class="tab-btn active" data-tab="performance">⚡ Boletim Kumon</button>
                         <button class="tab-btn" data-tab="programming">📅 Programação</button>
-                        <button class="tab-btn" data-tab="reports">📊 Boletim Escolar</button>
+                        <button class="tab-btn" data-tab="reports">🏫 Escola</button>
                         <button class="tab-btn" data-tab="analysis">🤖 Histórico Reuniões</button>
                     </div>
                     
                     <div id="tab-performance" class="tab-content active">
-                        <h3>⚡ Boletim do Método Kumon</h3>
-                        
-                        <div style="background: #eaf6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px;">
-                            <button id="openTaskAnalysisBtn" type="button" class="btn" style="flex: 1; background-color: #0078c1;">
-                                <i class='bx bx-camera'></i> Digitalizar Folha/Tarefa (IA)
-                            </button>
-                            <button id="generateTrajectoryBtn" type="button" class="btn" style="flex: 1; background-color: #7e22ce;">
-                                <i class='bx bx-brain'></i> Análise de Trajetória (Pré-Reunião)
-                            </button>
+                        <div style="background:#eaf6ff; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; gap:15px;">
+                            <button id="openTaskAnalysisBtn" type="button" class="btn" style="flex:1; background-color:#0078c1;"><i class='bx bx-camera'></i> Digitalizar Tarefa/Folha</button>
+                            <button id="generateTrajectoryBtn" type="button" class="btn" style="flex:1; background-color:#7e22ce;"><i class='bx bx-brain'></i> Análise Trajetória</button>
                         </div>
-
                         <div id="trajectoryInsightArea" class="hidden">
-                            <h4>🧠 Análise da IA</h4>
+                            <h4>🧠 Insight IA</h4>
                             <div id="trajectoryContent" class="trajectory-insight-box"></div>
                         </div>
-
                         <div class="history-section">
-                            <h4>Histórico de Folhas Realizadas</h4>
-                            <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px; margin-bottom: 10px;">
+                            <h4>Histórico de Folhas</h4>
+                            <select id="filterPerformance" class="form-input" style="width:auto; margin-bottom:10px;">
                                 <option value="all">Todas</option><option value="Matemática">Matemática</option>
                                 <option value="Português">Português</option><option value="Inglês">Inglês</option>
                             </select>
                             <div id="performanceHistory" class="history-list"></div>
                         </div>
-
-                        <details style="margin-top: 15px;">
-                            <summary>Adicionar Manualmente</summary>
+                        <details style="margin-top:15px;">
+                            <summary>Manual</summary>
                             <form id="performanceForm" class="inline-form">
                                 <div class="grid-3-col">
                                     <input type="date" id="performanceDate" required>
                                     <select id="performanceSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
-                                    <input type="text" id="performanceBlock" placeholder="Estágio/Folha" required>
+                                    <input type="text" id="performanceBlock" placeholder="Bloco/Folha" required>
                                 </div>
                                 <div class="grid-3-col">
-                                    <input type="number" id="performanceTimeGoal" placeholder="TPF">
-                                    <input type="number" id="performanceTimeTaken" placeholder="Tempo" required>
+                                    <input type="number" id="performanceTimeGoal" placeholder="Meta Min">
+                                    <input type="number" id="performanceTimeTaken" placeholder="Tempo Real" required>
                                     <select id="performanceGradeKumon" required><option value="100%">100%</option><option value="80-99%">80-99%</option><option value="<80%">< 80%</option><option value="Repetição">Repetição</option></select>
                                 </div>
                                 <button type="submit" class="btn btn-small">Salvar</button>
@@ -223,7 +211,7 @@
                     </div>
 
                     <div id="tab-programming" class="tab-content">
-                        <h3>📅 Programação</h3>
+                        <h3>Programação</h3>
                         <form id="programmingForm" class="inline-form">
                             <div class="grid-3-col">
                                 <input type="date" id="programmingDate" required>
@@ -240,12 +228,12 @@
                     </div>
 
                     <div id="tab-reports" class="tab-content">
-                        <h3>📊 Boletins Escolares (Notas Escola)</h3>
+                        <h3>Notas Escolares</h3>
                         <form id="reportForm" class="inline-form">
                             <div class="grid-3-col">
                                 <input type="date" id="reportDate" required>
                                 <select id="reportSubject"><option value="Matemática">Matemática</option><option value="Outra">Outra</option></select>
-                                <input type="number" id="reportGrade" placeholder="Nota 0-10">
+                                <input type="number" id="reportGrade" placeholder="Nota">
                             </div>
                             <input type="file" id="reportFile">
                             <button type="submit" class="btn">Adicionar</button>
@@ -264,15 +252,15 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="saveStudentBtn" class="btn">💾 Salvar Aluno</button>
-                <button id="deleteStudentBtn" class="btn btn-danger">🗑️ Excluir Aluno</button>
+                <button id="saveStudentBtn" class="btn">Salvar Aluno</button>
+                <button id="deleteStudentBtn" class="btn btn-danger">Excluir</button>
             </div>
         </div>
     </div>
 
     <div id="brainModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
-            <h2>🧠 Admin: Atualizar Cérebro</h2>
+            <h2>Atualizar Cérebro</h2>
             <button id="closeBrainModalBtn" class="close-btn">&times;</button>
             <div class="modal-body">
                 <input type="file" id="brainFileUploadModal">
@@ -283,13 +271,13 @@
 
     <div id="taskAnalysisModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
-            <h2>📸 Scanner Inteligente Kumon</h2>
+            <h2>Scanner Inteligente</h2>
             <button id="closeTaskAnalysisModalBtn" class="close-btn">&times;</button>
             <div class="modal-body">
                 <form id="taskAnalysisForm">
-                    <p>Selecione fotos de <strong>Folhas de Registro</strong> ou <strong>Tarefas/Testes</strong>:</p>
+                    <p>Selecione fotos de <strong>Folhas de Registro</strong> ou <strong>Tarefas</strong>:</p>
                     <input type="file" id="taskFilesInput" multiple accept="image/*" required>
-                    <button type="submit" id="startTaskAnalysisBtn" class="btn" style="margin-top: 15px;">Processar Imagens</button>
+                    <button type="submit" id="startTaskAnalysisBtn" class="btn" style="margin-top:15px;">Processar</button>
                     <div id="taskAnalysisStatusContainer" class="hidden">
                         <p id="taskAnalysisStatus">Iniciando...</p>
                         <div id="taskAnalysisProgress"><div id="taskAnalysisProgressBar">0%</div></div>
