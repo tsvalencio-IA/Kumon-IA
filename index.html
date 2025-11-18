@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Diário de Reuniões - Método Kumon</title>
+    <title>Plataforma Kumon - Gestão Inteligente</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
@@ -34,6 +34,8 @@
         /* Card Histórico */
         .meeting-card { background: white; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #0078c1; }
         .meeting-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 0.9em; }
+        .meeting-summary { font-size: 0.9em; color: #444; white-space: pre-line; }
+        .meeting-type { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
     </style>
 </head>
 <body id="app-page">
@@ -186,9 +188,9 @@
                     </div>
                     <div class="form-section"><label for="studentContact">Contato</label><input type="text" id="studentContact" placeholder="Ex: (17) 99999-9999"></div>
                     <div class="grid-3-col">
-                        <div class="form-section"><label for="mathStage">Matemática</label><input type="text" id="mathStage" placeholder="Ex: D150"></div>
-                        <div class="form-section"><label for="portStage">Português</label><input type="text" id="portStage" placeholder="Ex: CII 100"></div>
-                        <div class="form-section"><label for="engStage">Inglês</label><input type="text" id="engStage" placeholder="Ex: G 50"></div>
+                        <div class="form-section"><label for="mathStage">Matemática (Estágio)</label><input type="text" id="mathStage" placeholder="Ex: D150"></div>
+                        <div class="form-section"><label for="portStage">Português (Estágio)</label><input type="text" id="portStage" placeholder="Ex: CII 100"></div>
+                        <div class="form-section"><label for="engStage">Inglês (Estágio)</label><input type="text" id="engStage" placeholder="Ex: G 50"></div>
                     </div>
                 </form>
 
@@ -328,7 +330,7 @@
                         <legend>Upload das Imagens</legend>
                         <div class="form-group">
                             <label for="taskFilesInput">Selecione as fotos das tarefas (boletins, folhas, etc.)</label>
-                            <input type="file" id="taskFilesInput" accept="image/*" multiple required>
+                            <input type="file" id="taskFilesInput" multiple accept="image/*" required>
                         </div>
                     </fieldset>
                     
