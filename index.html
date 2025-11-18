@@ -12,32 +12,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Estilos para KPIs e Dashboard */
+        /* Estilos Originais Mantidos */
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background: #f8f9fa; border: 1px solid #d1e9f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .kpi-number { font-size: 2em; font-weight: bold; color: var(--kumon-blue); display: block; }
         .kpi-label { font-size: 0.85em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Badges de Matéria */
         .subject-badge { color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
         .subject-Matemática { background-color: #0078c1; }
         .subject-Português { background-color: #d62828; }
         .subject-Inglês { background-color: #f59e0b; }
         .subject-Outra { background-color: #888; }
-        
-        /* Barra de Progresso do Scanner */
-        #taskAnalysisProgress { width: 100%; height: 25px; background-color: var(--border-color); border-radius: 5px; overflow: hidden; margin-top: 10px; }
+
+        /* Estilos Novos (Scanner/IA) */
+        #taskAnalysisProgress { width: 100%; height: 25px; background-color: #e9ecef; border-radius: 5px; overflow: hidden; margin-top: 10px; }
         #taskAnalysisProgressBar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease; text-align: center; line-height: 25px; color: white; font-weight: 600; }
         #taskAnalysisStatus { margin-top: 10px; font-weight: 600; color: var(--kumon-blue); }
-        
-        /* Área de Trajetória */
         .trajectory-insight-box { background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 0.95em; line-height: 1.5; white-space: pre-wrap; }
-
-        /* Cartão de Histórico de Reunião */
-        .meeting-card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--kumon-blue); }
-        .meeting-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; color: var(--text-color); }
-        .meeting-summary { font-size: 0.9em; color: #555; white-space: pre-wrap; }
-        .meeting-type { font-size: 0.75em; text-transform: uppercase; background: #eee; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body id="app-page">
@@ -117,12 +108,10 @@
 
             <fieldset id="transcriptionModule" class="section-box hidden">
                 <legend>🤖 Análise de Reunião (Áudio)</legend>
-                
                 <div class="form-section">
-                    <label for="transcriptionOutput">📄 Transcrição Gerada (Revise e edite se necessário)</label>
+                    <label for="transcriptionOutput">📄 Transcrição Gerada</label>
                     <textarea id="transcriptionOutput" rows="10" placeholder="Aguardando transcrição do áudio..."></textarea>
                 </div>
-
                 <div class="button-container">
                     <button id="analyzeTranscriptionBtn" class="btn">2. Analisar Transcrição (Gemini)</button>
                 </div>
@@ -144,9 +133,7 @@
 
             <section id="reportSection" class="section-box hidden">
                 <h2>📊 Relatório Final Gerado (Áudio)</h2>
-                <div id="reportContent" class="report-content">
-                    <p>Relatório aparecerá aqui após processamento.</p>
-                </div>
+                <div id="reportContent" class="report-content"></div>
                 <div class="button-container">
                     <button id="downloadReportBtn" class="btn download-btn">Download Relatório (.json)</button>
                 </div>
@@ -166,57 +153,24 @@
             </div>
             <div class="modal-body">
                 <div class="kpi-container">
-                    <div class="kpi-card">
-                        <span class="kpi-number" id="kpi-total-students">0</span>
-                        <span class="kpi-label">Alunos Ativos</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="kpi-number" id="kpi-total-subjects">0</span>
-                        <span class="kpi-label">Matrículas Totais</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="kpi-number" id="kpi-multi-subject">0</span>
-                        <span class="kpi-label">Alunos Multi-Matérias</span>
-                    </div>
-                    <div class="kpi-card" style="border-color: var(--kumon-red);">
-                        <span class="kpi-number" id="kpi-risk-count" style="color: var(--kumon-red);">0</span>
-                        <span class="kpi-label">Em Atenção</span>
-                    </div>
+                    <div class="kpi-card"><span class="kpi-number" id="kpi-total-students">0</span><span class="kpi-label">Alunos Ativos</span></div>
+                    <div class="kpi-card"><span class="kpi-number" id="kpi-total-subjects">0</span><span class="kpi-label">Matrículas Totais</span></div>
+                    <div class="kpi-card"><span class="kpi-number" id="kpi-multi-subject">0</span><span class="kpi-label">Alunos Multi-Matérias</span></div>
+                    <div class="kpi-card" style="border-color: var(--kumon-red);"><span class="kpi-number" id="kpi-risk-count" style="color: var(--kumon-red);">0</span><span class="kpi-label">Em Atenção</span></div>
                 </div>
-
                 <div class="grid-2-col">
                     <div class="section-box" style="grid-column: span 2;">
-                        <h3>📈 Distribuição de Estágios por Disciplina</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="stagesChart"></canvas>
-                        </div>
+                        <h3>📈 Distribuição de Estágios</h3>
+                        <div style="height: 300px; position: relative;"><canvas id="stagesChart"></canvas></div>
                     </div>
                 </div>
-
                 <div class="grid-2-col" style="margin-top: 20px;">
-                    <div class="section-box">
-                        <h3>🍰 Distribuição de Matrículas</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="subjectsChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="section-box">
-                        <h3>🌡️ Termômetro Emocional (IA)</h3>
-                        <div style="height: 300px; position: relative;">
-                            <canvas id="moodChart"></canvas>
-                        </div>
-                    </div>
+                    <div class="section-box"><h3>🍰 Matrículas</h3><div style="height: 300px; position: relative;"><canvas id="subjectsChart"></canvas></div></div>
+                    <div class="section-box"><h3>🌡️ Termômetro Emocional (IA)</h3><div style="height: 300px; position: relative;"><canvas id="moodChart"></canvas></div></div>
                 </div>
-
                 <div class="grid-2-col" style="margin-top: 20px;">
-                    <div class="section-box" style="border-left: 5px solid var(--kumon-red);">
-                        <h3 style="color: var(--kumon-red);">⚠️ Alunos em Atenção/Risco</h3>
-                        <ul id="riskList" style="list-style: none; padding: 0;"></ul>
-                    </div>
-                    <div class="section-box" style="border-left: 5px solid var(--success);">
-                        <h3 style="color: var(--success);">⭐ Alunos Destaque</h3>
-                        <ul id="starList" style="list-style: none; padding: 0;"></ul>
-                    </div>
+                    <div class="section-box" style="border-left: 5px solid var(--kumon-red);"><h3 style="color: var(--kumon-red);">⚠️ Alunos em Atenção/Risco</h3><ul id="riskList" style="list-style: none; padding: 0;"></ul></div>
+                    <div class="section-box" style="border-left: 5px solid var(--success);"><h3 style="color: var(--success);">⭐ Alunos Destaque</h3><ul id="starList" style="list-style: none; padding: 0;"></ul></div>
                 </div>
             </div>
         </div>
@@ -232,91 +186,25 @@
                 <form id="studentForm">
                     <input type="hidden" id="studentId">
                     <div class="grid-2-col">
-                        <div class="form-section">
-                            <label for="studentName">Nome do Aluno</label>
-                            <input type="text" id="studentName" required>
-                        </div>
-                        <div class="form-section">
-                            <label for="studentResponsible">Responsável</label>
-                            <input type="text" id="studentResponsible" required>
-                        </div>
+                        <div class="form-section"><label for="studentName">Nome do Aluno</label><input type="text" id="studentName" required></div>
+                        <div class="form-section"><label for="studentResponsible">Responsável</label><input type="text" id="studentResponsible" required></div>
                     </div>
-                    <div class="form-section">
-                        <label for="studentContact">Contato (Telefone/Email)</label>
-                        <input type="text" id="studentContact" placeholder="Ex: (17) 99999-9999">
-                    </div>
+                    <div class="form-section"><label for="studentContact">Contato</label><input type="text" id="studentContact" placeholder="Ex: (17) 99999-9999"></div>
                     <div class="grid-3-col">
-                        <div class="form-section">
-                            <label for="mathStage">Matemática (Estágio)</label>
-                            <input type="text" id="mathStage" placeholder="Ex: D150">
-                        </div>
-                        <div class="form-section">
-                            <label for="portStage">Português (Estágio)</label>
-                            <input type="text" id="portStage" placeholder="Ex: CII 100">
-                        </div>
-                        <div class="form-section">
-                            <label for="engStage">Inglês (Estágio)</label>
-                            <input type="text" id="engStage" placeholder="Ex: G 50">
-                        </div>
+                        <div class="form-section"><label for="mathStage">Matemática</label><input type="text" id="mathStage" placeholder="Ex: D150"></div>
+                        <div class="form-section"><label for="portStage">Português</label><input type="text" id="portStage" placeholder="Ex: CII 100"></div>
+                        <div class="form-section"><label for="engStage">Inglês</label><input type="text" id="engStage" placeholder="Ex: G 50"></div>
                     </div>
                 </form>
 
                 <div class="tabs-container">
                     <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="performance">⚡ Boletim Kumon</button>
+                        <button class="tab-btn active" data-tab="performance">⚡ Folha de Registro</button>
                         <button class="tab-btn" data-tab="programming">📅 Programação</button>
-                        <button class="tab-btn" data-tab="reports">📊 Boletim Escolar</button>
-                        <button class="tab-btn" data-tab="analysis">🤖 Histórico Reuniões</button>
+                        <button class="tab-btn" data-tab="reports">📊 Boletins Escolares</button>
+                        <button class="tab-btn" data-tab="analysis">🤖 Análise IA (Áudio)</button>
                     </div>
                     
-                    <div id="tab-performance" class="tab-content active">
-                        <h3>⚡ Folha de Registro (Boletim Kumon)</h3>
-                        
-                        <div style="background: #eaf6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; border: 1px solid #d1e9f6;">
-                            <button id="openTaskAnalysisBtn" type="button" class="btn" style="flex: 1; background-color: #0078c1;">
-                                <i class='bx bx-camera'></i> Digitalizar Tarefa (IA)
-                            </button>
-                            <button id="generateTrajectoryBtn" type="button" class="btn" style="flex: 1; background-color: #7e22ce;">
-                                <i class='bx bx-brain'></i> Análise Trajetória
-                            </button>
-                        </div>
-
-                        <div id="trajectoryInsightArea" class="hidden">
-                            <h4>🧠 Análise de Trajetória (IA)</h4>
-                            <div id="trajectoryContent" class="trajectory-insight-box"></div>
-                        </div>
-
-                        <div class="history-section" style="margin-top: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4>Histórico de Tarefas (Boletim)</h4>
-                                <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;">
-                                    <option value="all">Todas as Matérias</option>
-                                    <option value="Matemática">Matemática</option>
-                                    <option value="Português">Português</option>
-                                    <option value="Inglês">Inglês</option>
-                                </select>
-                            </div>
-                            <div id="performanceHistory" class="history-list"></div>
-                        </div>
-                        
-                        <details style="margin-top: 20px;">
-                            <summary style="cursor:pointer; color: #888;">Adicionar Registro Manualmente</summary>
-                            <form id="performanceForm" class="inline-form" style="margin-top: 10px;">
-                                <div class="grid-3-col">
-                                    <div class="form-section"><label for="performanceDate">Data</label><input type="date" id="performanceDate" required></div>
-                                    <div class="form-section"><label for="performanceSubject">Disciplina</label><select id="performanceSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select></div>
-                                     <div class="form-section"><label for="performanceBlock">Bloco/Folha</label><input type="text" id="performanceBlock" placeholder="Ex: D10" required></div>
-                                </div>
-                                <div class="grid-3-col">
-                                    <div class="form-section"><label for="performanceTimeGoal">Meta (min)</label><input type="number" id="performanceTimeGoal" placeholder="Ex: 20"></div>
-                                    <div class="form-section"><label for="performanceTimeTaken">Tempo (min)</label><input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required></div>
-                                    <div class="form-section"><label for="performanceGradeKumon">Nota</label><select id="performanceGradeKumon" required><option value="100%">100% (Ótimo)</option><option value="80-99%">80-99% (Corrigido)</option><option value="<80%">< 80% (Atenção)</option><option value="Repetição">Repetição</option></select></div>
-                                </div>
-                                <button type="submit" class="btn btn-small">Salvar Manual</button>
-                            </form>
-                        </details>
-                    </div>
-
                     <div id="tab-programming" class="tab-content">
                         <h3>📅 Programação de Material</h3>
                         <form id="programmingForm" class="inline-form">
@@ -325,14 +213,11 @@
                                 <div class="form-section"><label for="programmingSubject">Disciplina</label><select id="programmingSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select></div>
                                 <div class="form-section"><label for="programmingMaterial">Bloco/Páginas</label><input type="text" id="programmingMaterial" placeholder="Ex: D1-D10" required></div>
                             </div>
-                            <div class="form-section"><label for="programmingNotes">Observações</label><textarea id="programmingNotes" rows="2" placeholder="Ex: Foco em operações básicas"></textarea></div>
+                            <div class="form-section"><label for="programmingNotes">Observações</label><textarea id="programmingNotes" rows="2"></textarea></div>
                             <button type="submit" class="btn">Adicionar Programação</button>
                         </form>
                         <div class="history-section">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4>Histórico de Programação</h4>
-                                <select id="filterProgramming" class="form-input" style="width: auto; padding: 5px;"><option value="all">Todas as Matérias</option><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
-                            </div>
+                            <select id="filterProgramming" class="form-input" style="width: auto; padding: 5px;"><option value="all">Todas as Matérias</option><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
                             <div id="programmingHistory" class="history-list"></div>
                         </div>
                     </div>
@@ -343,25 +228,66 @@
                             <div class="grid-3-col">
                                 <div class="form-section"><label for="reportDate">Data</label><input type="date" id="reportDate" required></div>
                                 <div class="form-section"><label for="reportSubject">Disciplina Escolar</label><select id="reportSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option><option value="Outra">Outra</option></select></div>
-                                <div class="form-section"><label for="reportGrade">Nota (0-10)</label><input type="number" id="reportGrade" min="0" max="10" step="0.1" required></div>
+                                <div class="form-section"><label for="reportGrade">Nota</label><input type="number" id="reportGrade" min="0" max="10" step="0.1" required></div>
                             </div>
-                            <div class="form-section"><label for="reportFile">Anexar Boletim (Foto)</label><input type="file" id="reportFile" accept="image/*,.pdf"></div>
+                            <div class="form-section"><label for="reportFile">Anexar Boletim</label><input type="file" id="reportFile" accept="image/*,.pdf"></div>
                             <button type="submit" class="btn">Adicionar Boletim Escolar</button>
                         </form>
                         <div class="history-section">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4>Histórico de Boletins</h4>
-                                <select id="filterReports" class="form-input" style="width: auto; padding: 5px;"><option value="all">Todas</option><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
-                            </div>
+                            <select id="filterReports" class="form-input" style="width: auto; padding: 5px;"><option value="all">Todas</option><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
                             <div id="reportHistory" class="history-list"></div>
                         </div>
                     </div>
 
-                    <div id="tab-analysis" class="tab-content">
-                        <h3>🤖 Histórico de Análises e Reuniões</h3>
-                        <div id="meetingHistoryList" class="history-list">
+                    <div id="tab-performance" class="tab-content active">
+                        <h3>⚡ Folha de Registro (Desempenho Diário)</h3>
+                        
+                        <div style="background: #eaf6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; border: 1px solid #d1e9f6;">
+                            <button id="openTaskAnalysisBtn" type="button" class="btn" style="flex: 1; background-color: #0078c1;">
+                                <i class='bx bx-camera'></i> Digitalizar Folha/Tarefa (IA)
+                            </button>
+                            <button id="generateTrajectoryBtn" type="button" class="btn" style="flex: 1; background-color: #7e22ce;">
+                                <i class='bx bx-brain'></i> Análise Trajetória (Pré-Reunião)
+                            </button>
+                        </div>
+
+                        <div id="trajectoryInsightArea" class="hidden">
+                            <h4>🧠 Análise de Trajetória (IA)</h4>
+                            <div id="trajectoryContent" class="trajectory-insight-box"></div>
+                        </div>
+
+                        <div class="history-section">
+                             <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Histórico de Registros</h4>
+                                <select id="filterPerformance" class="form-input" style="width: auto; padding: 5px;"><option value="all">Todas as Matérias</option><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select>
                             </div>
-                        <pre id="student-analysis-content" class="hidden"></pre> 
+                            <div id="performanceHistory" class="history-list"></div>
+                        </div>
+
+                        <details style="margin-top: 20px;">
+                            <summary>Adicionar Registro Manualmente</summary>
+                            <form id="performanceForm" class="inline-form" style="margin-top: 10px;">
+                                <div class="grid-3-col">
+                                    <div class="form-section"><label for="performanceDate">Data</label><input type="date" id="performanceDate" required></div>
+                                    <div class="form-section"><label for="performanceSubject">Disciplina</label><select id="performanceSubject" required><option value="Matemática">Matemática</option><option value="Português">Português</option><option value="Inglês">Inglês</option></select></div>
+                                     <div class="form-section"><label for="performanceBlock">Bloco</label><input type="text" id="performanceBlock" placeholder="Ex: D10" required></div>
+                                </div>
+                                <div class="grid-3-col">
+                                    <div class="form-section"><label for="performanceTimeGoal">Meta</label><input type="number" id="performanceTimeGoal" placeholder="Ex: 20"></div>
+                                    <div class="form-section"><label for="performanceTimeTaken">Tempo</label><input type="number" id="performanceTimeTaken" placeholder="Ex: 25" required></div>
+                                    <div class="form-section"><label for="performanceGradeKumon">Nota</label><select id="performanceGradeKumon" required><option value="100%">100%</option><option value="95-99%">95-99%</option><option value="90-94%">90-94%</option><option value="80-89%">80-89%</option><option value="<80%">< 80%</option><option value="REPETIR">REPETIR</option><option value="ELOGIO">ELOGIO</option><option value="ALERTA">ALERTA</option></select></div>
+                                </div>
+                                <button type="submit" class="btn">Adicionar Registro</button>
+                            </form>
+                        </details>
+                    </div>
+
+                    <div id="tab-analysis" class="tab-content">
+                        <h3>🤖 Histórico de Reuniões e Análises</h3>
+                        <div class="analysis-section">
+                             <div id="meetingHistoryList" class="history-list"></div>
+                             <pre id="student-analysis-content" class="hidden"></pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -385,7 +311,7 @@
                         <label for="brainFileUploadModal">📁 Enviar novo arquivo JSON</label>
                         <input type="file" id="brainFileUploadModal" accept=".json" />
                         <button id="uploadBrainFileBtnModal" class="btn">Enviar e Atualizar</button>
-                        <p class="text-sm text-gray-500 mt-1">Este arquivo será mesclado com o 'brain.json' atual no banco de dados.</p>
+                        <p class="text-sm text-gray-500 mt-1">Este arquivo será mesclado com o 'brain.json'.</p>
                     </div>
                 </fieldset>
             </div>
@@ -401,31 +327,24 @@
             <div class="modal-body">
                 <form id="taskAnalysisForm">
                     <fieldset>
-                        <legend>1. Upload das Imagens</legend>
+                        <legend>Upload</legend>
                         <div class="form-group">
-                            <label for="taskFilesInput">Selecione as fotos (Folhas de Registro ou Tarefas):</label>
+                            <label for="taskFilesInput">Selecione fotos de Folhas de Registro ou Tarefas:</label>
                             <input type="file" id="taskFilesInput" accept="image/*" multiple required>
                         </div>
                     </fieldset>
-                    
                     <fieldset>
-                        <legend>2. Processamento</legend>
-                        <button type="submit" id="startTaskAnalysisBtn" class="btn">
-                            <i class='bx bx-images'></i> Processar Imagens
-                        </button>
-                        
+                        <legend>Processamento</legend>
+                        <button type="submit" id="startTaskAnalysisBtn" class="btn"><i class='bx bx-images'></i> Processar</button>
                         <div id="taskAnalysisStatusContainer" class="hidden" style="margin-top: 20px;">
                             <div id="taskAnalysisStatus">Processando...</div>
-                            <div id="taskAnalysisProgress">
-                                <div id="taskAnalysisProgressBar">0%</div>
-                            </div>
+                            <div id="taskAnalysisProgress"><div id="taskAnalysisProgressBar">0%</div></div>
                         </div>
                     </fieldset>
                 </form>
             </div>
         </div>
     </div>
-
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
