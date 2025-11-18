@@ -53,7 +53,6 @@
 </head>
 <body>
     
-    <!-- Tela de Login (Inicial) -->
     <div id="login-screen" class="login-container">
         <form id="login-form">
             <img src="icon.png" alt="Kumon Logo" class="login-logo">
@@ -71,10 +70,8 @@
         </form>
     </div>
 
-    <!-- Container Principal da Aplicação (Oculto por padrão) -->
     <div id="app-container" class="hidden">
         
-        <!-- Header Fixo -->
         <header class="app-header">
             <div class="header-logo">
                 <img src="icon.png" alt="Kumon Logo">
@@ -94,10 +91,8 @@
             </div>
         </header>
 
-        <!-- Corpo Principal -->
         <main class="main-container">
             
-            <!-- Barra Lateral (Lista de Alunos) -->
             <aside class="sidebar">
                 <div class="sidebar-header">
                     <h3>Meus Alunos</h3>
@@ -107,11 +102,9 @@
                     <input type="text" id="studentSearch" placeholder="Buscar aluno...">
                 </div>
                 <div id="studentList" class="student-list">
-                    <!-- Alunos serão carregados aqui pelo app.js -->
-                </div>
+                    </div>
             </aside>
 
-            <!-- Área de Conteúdo (Detalhes do Aluno) -->
             <section id="contentArea" class="content-area">
                 <div id="welcomeScreen" class="welcome-screen">
                     <i class='bx bx-user-pin welcome-icon'></i>
@@ -120,7 +113,6 @@
                 </div>
 
                 <div id="studentDetail" class="hidden">
-                    <!-- Detalhes do Aluno (cabeçalho) -->
                     <div class="student-detail-header">
                         <h2 id="studentNameHeader">Nome do Aluno</h2>
                         <div class="student-meta">
@@ -129,7 +121,6 @@
                         </div>
                     </div>
 
-                    <!-- Módulos de Estágio -->
                     <div class="stage-container">
                         <div class="stage-card">
                             <label>Matemática</label>
@@ -146,7 +137,6 @@
                         <button id="saveStagesBtn" class="btn btn-primary"><i class='bx bx-save'></i> Salvar Estágios</button>
                     </div>
 
-                    <!-- Abas de Conteúdo (Boletins, Reuniões) -->
                     <div class="tabs">
                         <button class="tab-link active" onclick="App.openTab(event, 'tabBoletim')">
                             <i class='bx bx-spreadsheet'></i> Folha de Registro
@@ -154,13 +144,11 @@
                         <button class="tab-link" onclick="App.openTab(event, 'tabReunioes')">
                             <i class='bx bx-conversation'></i> Diário de Reuniões
                         </button>
-                        <!-- NOVO (V2): Aba para o novo log -->
                         <button class="tab-link" onclick="App.openTab(event, 'tabPerformance')">
                             <i class='bx bx-task'></i> Log de Tarefas (IA)
                         </button>
                     </div>
 
-                    <!-- Conteúdo da Aba: Boletim (Folha de Registro) -->
                     <div id="tabBoletim" class="tab-content active">
                         <div class="tab-header">
                             <h3>Histórico da Folha de Registro</h3>
@@ -169,11 +157,9 @@
                             </button>
                         </div>
                         <div id="gradeHistory" class="history-list">
-                            <!-- Histórico de boletins carregado pelo app.js -->
-                        </div>
+                            </div>
                     </div>
                     
-                    <!-- Conteúdo da Aba: Reuniões -->
                     <div id="tabReunioes" class="tab-content">
                         <div class="tab-header">
                             <h3>Histórico de Reuniões</h3>
@@ -182,11 +168,9 @@
                             </button>
                         </div>
                         <div id="meetingHistory" class="history-list">
-                            <!-- Histórico de reuniões carregado pelo app.js -->
-                        </div>
+                            </div>
                     </div>
                     
-                    <!-- NOVO (V2): Conteúdo da Aba: Log de Performance (IA) -->
                     <div id="tabPerformance" class="tab-content">
                         <div class="tab-header">
                             <h3>Log de Tarefas Analisadas (IA)</h3>
@@ -195,8 +179,7 @@
                             </button>
                         </div>
                         <div id="performanceLogContainer" class="performance-log-container">
-                            <!-- Log de performance da V2 será carregado aqui -->
-                        </div>
+                            </div>
                     </div>
 
                 </div>
@@ -204,11 +187,6 @@
         </main>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- ======================= MODAIS DA APLICAÇÃO ===================== -->
-    <!-- =================================================================== -->
-
-    <!-- Modal: Adicionar Aluno -->
     <div id="studentModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -239,7 +217,6 @@
         </div>
     </div>
 
-    <!-- Modal: Adicionar Boletim (Folha de Registro) -->
     <div id="gradeModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
@@ -281,7 +258,6 @@
         </div>
     </div>
 
-    <!-- Modal: Diário de Reunião (IA) -->
     <div id="meetingModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -320,7 +296,6 @@
         </div>
     </div>
 
-    <!-- Modal: Visualizar Relatório de Reunião -->
     <div id="reportModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -328,12 +303,10 @@
                 <button id="closeReportModalBtn" class="close-btn">&times;</button>
             </div>
             <div id="reportModalBody" class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <!-- Conteúdo do relatório (JSON formatado) será injetado aqui -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Modal: Dashboard Geral -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
@@ -366,7 +339,6 @@
         </div>
     </div>
     
-    <!-- Modal: Admin (Cérebro da IA) -->
     <div id="brainModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
@@ -387,7 +359,6 @@
         </div>
     </div>
     
-    <!-- NOVO (V2): Modal de Análise de Tarefas (IA) -->
     <div id="taskAnalysisModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
@@ -411,7 +382,6 @@
                             <i class='bx bx-images'></i> Iniciar Análise da Fila
                         </button>
                         
-                        <!-- Status do Processamento -->
                         <div id="taskAnalysisStatusContainer" class="hidden" style="margin-top: 20px;">
                             <div id="taskAnalysisStatus">Processando...</div>
                             <div id="taskAnalysisProgress">
@@ -430,7 +400,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script> 
     
-    <!-- Corrigido para a pasta 'js/' (um 's') -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
