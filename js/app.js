@@ -1,5 +1,5 @@
-// App.js - Plataforma Kumon V42.0 (INTEGRIDADE MÁXIMA)
-// Status: Código 100% Completo | Reset OK | Delete OK | API OK.
+// App.js - Plataforma Kumon V46.0 (DELETE HISTÓRICO DE REUNIÕES OK)
+// Status: Agora é possível apagar registros da aba Histórico Reuniões/Análises.
 
 const App = {
     state: {
@@ -61,7 +61,7 @@ const App = {
 
     addEventListeners() {
         this.elements.logoutButton.addEventListener('click', () => firebase.auth().signOut());
-        this.elements.systemOptionsBtn.addEventListener('click', () => this.promptForReset()); // Restaura o fluxo de Reset
+        this.elements.systemOptionsBtn.addEventListener('click', () => this.promptForReset());
         this.elements.dashboardBtn.addEventListener('click', () => this.openDashboard());
         this.elements.closeDashboardBtn.addEventListener('click', () => this.closeDashboard());
         this.elements.dashboardModal.addEventListener('click', (e) => { if (e.target === this.elements.dashboardModal) this.closeDashboard(); });
@@ -226,7 +226,10 @@ const App = {
             container.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma reunião registrada.</p>';
             return;
         }
-        container.innerHTML = history.map((h) => {
+        container.innerHTML = history.map((h, index) => {
+            // Garante um ID único para o delete, usando o índice como fallback se h.id não existir
+            const itemId = h.id || `hist-${index}`;
+            
             let dateStr = "Data desc.";
             if (h.meta && h.meta.date) dateStr = new Date(h.meta.date).toLocaleDateString();
             else if (h.date) dateStr = h.date; 
@@ -236,7 +239,11 @@ const App = {
             
             return `
             <div class="meeting-card">
-                <div class="meeting-header"><span>${dateStr}</span><span class="meeting-type">${type}</span></div>
+                <div class="meeting-header">
+                    <span>${dateStr}</span>
+                    <span class="meeting-type">${type}</span>
+                    <button class="delete-history-btn" onclick="App.deleteMeetingEntry('${itemId}')">&times;</button>
+                </div>
                 <div class="meeting-summary">${summary}</div>
             </div>`;
         }).reverse().join('');
@@ -261,7 +268,7 @@ const App = {
             return;
         }
 
-        container.innerHTML = filteredData.sort((a,b) => new Date(b.date || b.createdAt) - new Date(a.date || a.acreatedAt)).map(e => {
+        container.innerHTML = filteredData.sort((a,b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)).map(e => {
             if (type === 'performanceLog') {
                 const isAlert = e.gradeKumon && (e.gradeKumon.includes('<') || e.gradeKumon.includes('Rep'));
                 const sub = e.subject || 'Matemática';
@@ -325,6 +332,7 @@ const App = {
 
             try {
                 const b64 = await this.imageToBase64(file);
+                // FIX: Passa o mimeType real do arquivo
                 let resultStr = await this.callGeminiAPI(prompt, "Extraia dados JSON.", b64, file.type);
                 resultStr = resultStr.replace(/```json/g, '').replace(/```/g, '').trim();
                 const resultJson = JSON.parse(resultStr);
@@ -335,7 +343,7 @@ const App = {
                         const finalSubject = row.subject || 'Matemática'; 
                         
                         newEntries.push({
-                            id: Date.now() + Math.random(),
+                            id: String(Date.now()) + Math.random(), // Garante ID String para o delete funcionar
                             createdAt: new Date().toISOString(),
                             date: finalDate,
                             subject: finalSubject,
@@ -390,11 +398,15 @@ const App = {
             this.elements.trajectoryContent.textContent = text;
             this.elements.trajectoryInsightArea.classList.remove('hidden');
 
-            if (!student.meetingHistory) student.meetingHistory = [];
-            student.meetingHistory.push({
+            // Cria o registro da análise com ID único
+            const analysisEntry = {
+                id: String(Date.now()) + Math.random(),
                 meta: { date: new Date().toISOString(), type: "PRE_MEETING_ANALYSIS" },
                 resumo_executivo: text
-            });
+            };
+
+            if (!student.meetingHistory) student.meetingHistory = [];
+            student.meetingHistory.push(analysisEntry);
             await this.setData('alunos/lista_alunos', { students: this.state.students });
             this.loadStudentHistories(this.state.currentStudentId);
 
@@ -407,7 +419,7 @@ const App = {
     },
 
     // =====================================================================
-    // 5. DASHBOARD (KPIs CORRIGIDOS)
+    // 5. DASHBOARD E KPIs
     // =====================================================================
     openDashboard() {
         this.elements.dashboardModal.classList.remove('hidden');
@@ -439,16 +451,12 @@ const App = {
 
             const last = s.performanceLog && s.performanceLog.length > 0 ? s.performanceLog[s.performanceLog.length - 1] : null;
             
-            // Lógica de Risco Ajustada (Ampla para detectar alertas)
             if (last) {
                 const grade = String(last.gradeKumon).toUpperCase();
                 
-                // Risco: <80, REPETIR, ou ALERTA
                 if (grade.includes('<80') || grade.includes('REPETIR') || grade.includes('ALERTA') || parseInt(grade) < 80) {
                     riskStudents.push(s); riskCount++;
-                } 
-                // Destaque: 100% ou ELOGIO
-                else if (grade.includes('100') || grade.includes('ELOGIO')) {
+                } else if (grade.includes('100') || grade.includes('ELOGIO') || parseInt(grade) >= 95) {
                     starStudents.push(s);
                 }
             }
@@ -541,7 +549,7 @@ const App = {
 
     async addHistoryEntry(e, type, form) {
         e.preventDefault();
-        const entry = { id: Date.now().toString(), createdAt: new Date().toISOString() };
+        const entry = { id: String(Date.now()) + Math.random(), createdAt: new Date().toISOString() };
         Array.from(form.elements).forEach(el => {
             if(el.id && !el.id.includes('File')) {
                 const key = el.id.replace(/performance|report|programming/i, '').toLowerCase();
@@ -566,7 +574,7 @@ const App = {
         form.reset();
     },
 
-    // CORREÇÃO: Apagar agora usa String(ID) para evitar erro de tipo
+    // CORREÇÃO: Apagar entradas do Histórico de Tarefas (performanceLog, programmingHistory, reportHistory)
     async deleteHistoryEntry(type, id) {
         if(!confirm('Apagar?')) return;
         const s = this.state.students[this.state.currentStudentId];
@@ -574,6 +582,20 @@ const App = {
         if (s[type]) {
             // Garante que a comparação funcione mesmo que um ID seja número e o outro string do HTML
             s[type] = s[type].filter(x => String(x.id) !== String(id));
+        }
+
+        await this.setData('alunos/lista_alunos', { students: this.state.students });
+        this.loadStudentHistories(this.state.currentStudentId);
+    },
+
+    // NOVA FUNÇÃO: Apagar entradas do Histórico de Reuniões/Análises
+    async deleteMeetingEntry(id) {
+        if(!confirm('Apagar esta análise de reunião?')) return;
+        const s = this.state.students[this.state.currentStudentId];
+        
+        if (s.meetingHistory) {
+            // Filtra pelo ID da análise
+            s.meetingHistory = s.meetingHistory.filter(x => String(x.id) !== String(id));
         }
 
         await this.setData('alunos/lista_alunos', { students: this.state.students });
@@ -603,7 +625,7 @@ const App = {
         await this.saveBrainData(brain);
     },
 
-    // RESTAURAÇÃO DA FUNÇÃO RESET (Completa)
+    // RESTAURAÇÃO COMPLETA DA FUNÇÃO RESET
     promptForReset() { 
         const code = prompt('Senha Admin (*177: Cérebro | RESET: Apagar Tudo):');
         if(code === '*177') this.elements.brainModal.classList.remove('hidden'); 
@@ -638,7 +660,9 @@ const App = {
         } catch (e) { alert('Erro JSON: ' + e.message); }
     },
 
-    // --- API HELPER (SEM ABREVIAÇÕES) ---
+    // =====================================================================
+    // 8. GEMINI API & AUDIO
+    // =====================================================================
     imageToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -680,7 +704,6 @@ const App = {
         return (await response.json()).candidates[0].content.parts[0].text;
     },
 
-    // Audio Legacy
     handleFileUpload() { const f = this.elements.audioUpload.files[0]; if(f) { this.state.audioFile = f; this.elements.audioFileName.textContent = f.name; this.elements.transcribeAudioBtn.disabled = false; } },
     
     async transcribeAudioGemini() { 
@@ -707,7 +730,16 @@ const App = {
     async analyzeTranscriptionGemini() {
         const t = this.elements.transcriptionOutput.value; const s = this.state.students[this.elements.meetingStudentSelect.value];
         this.elements.reportSection.classList.remove('hidden'); this.elements.reportContent.textContent = "Gerando...";
-        try { const j = JSON.parse(await this.callGeminiAPI("JSON {resumo_executivo}", `Analise: ${t}. Aluno: ${s.name}`)); this.elements.reportContent.textContent = JSON.stringify(j, null, 2); if(!s.meetingHistory) s.meetingHistory=[]; s.meetingHistory.push(j); await this.setData('alunos/lista_alunos', { students: this.state.students }); } catch(e) { alert(e.message); }
+        try { 
+            // Adicionamos ID para garantir que o item seja apagável
+            const analysisEntry = JSON.parse(await this.callGeminiAPI("JSON {resumo_executivo}", `Analise: ${t}. Aluno: ${s.name}`));
+            analysisEntry.id = String(Date.now()) + Math.random(); 
+            
+            this.elements.reportContent.textContent = JSON.stringify(analysisEntry, null, 2); 
+            if(!s.meetingHistory) s.meetingHistory=[]; 
+            s.meetingHistory.push(analysisEntry); 
+            await this.setData('alunos/lista_alunos', { students: this.state.students }); 
+        } catch(e) { alert(e.message); }
     },
     
     downloadReport() { const b = new Blob([this.elements.reportContent.textContent], {type:'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'report.json'; a.click(); }
