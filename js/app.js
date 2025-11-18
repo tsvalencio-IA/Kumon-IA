@@ -1,5 +1,5 @@
-// App.js - Plataforma Kumon V46.0 (DELETE HISTÓRICO DE REUNIÕES OK)
-// Status: Agora é possível apagar registros da aba Histórico Reuniões/Análises.
+// App.js - Plataforma Kumon V50.0 (FINAL STABLE)
+// CORREÇÕES: Delete OK, Reset de Formulário OK, KPIs calibrados.
 
 const App = {
     state: {
@@ -168,11 +168,12 @@ const App = {
     openStudentModal(id) {
         this.state.currentStudentId = id;
         this.elements.studentModal.classList.remove('hidden');
-        const s = id ? this.state.students[id] : {};
-        this.elements.studentForm.reset();
-        
+        this.elements.studentForm.reset(); // Zera valores
+
         if (id) {
+            const s = this.state.students[id];
             this.elements.modalTitle.textContent = s.name;
+            // Carrega dados
             document.getElementById('studentName').value = s.name || '';
             document.getElementById('studentResponsible').value = s.responsible || '';
             document.getElementById('studentContact').value = s.contact || '';
@@ -186,6 +187,14 @@ const App = {
             this.elements.trajectoryInsightArea.classList.add('hidden');
             this.elements.trajectoryContent.textContent = "";
         } else {
+            // FIX CRÍTICO: Garante que os campos fiquem vazios para "Novo Aluno"
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentResponsible').value = '';
+            document.getElementById('studentContact').value = '';
+            document.getElementById('mathStage').value = '';
+            document.getElementById('portStage').value = '';
+            document.getElementById('engStage').value = '';
+            
             this.elements.modalTitle.textContent = 'Novo Aluno';
             this.elements.deleteStudentBtn.style.display = 'none';
         }
@@ -227,9 +236,7 @@ const App = {
             return;
         }
         container.innerHTML = history.map((h, index) => {
-            // Garante um ID único para o delete, usando o índice como fallback se h.id não existir
-            const itemId = h.id || `hist-${index}`;
-            
+            const itemId = h.id || `hist-${index}`; // Garante ID
             let dateStr = "Data desc.";
             if (h.meta && h.meta.date) dateStr = new Date(h.meta.date).toLocaleDateString();
             else if (h.date) dateStr = h.date; 
@@ -332,7 +339,6 @@ const App = {
 
             try {
                 const b64 = await this.imageToBase64(file);
-                // FIX: Passa o mimeType real do arquivo
                 let resultStr = await this.callGeminiAPI(prompt, "Extraia dados JSON.", b64, file.type);
                 resultStr = resultStr.replace(/```json/g, '').replace(/```/g, '').trim();
                 const resultJson = JSON.parse(resultStr);
@@ -343,7 +349,7 @@ const App = {
                         const finalSubject = row.subject || 'Matemática'; 
                         
                         newEntries.push({
-                            id: String(Date.now()) + Math.random(), // Garante ID String para o delete funcionar
+                            id: String(Date.now()) + Math.random(),
                             createdAt: new Date().toISOString(),
                             date: finalDate,
                             subject: finalSubject,
@@ -398,9 +404,8 @@ const App = {
             this.elements.trajectoryContent.textContent = text;
             this.elements.trajectoryInsightArea.classList.remove('hidden');
 
-            // Cria o registro da análise com ID único
             const analysisEntry = {
-                id: String(Date.now()) + Math.random(),
+                id: String(Date.now()) + Math.random(), // Garante ID String para o delete
                 meta: { date: new Date().toISOString(), type: "PRE_MEETING_ANALYSIS" },
                 resumo_executivo: text
             };
@@ -419,7 +424,7 @@ const App = {
     },
 
     // =====================================================================
-    // 5. DASHBOARD E KPIs
+    // 5. DASHBOARD (KPIs CORRIGIDOS)
     // =====================================================================
     openDashboard() {
         this.elements.dashboardModal.classList.remove('hidden');
@@ -454,9 +459,12 @@ const App = {
             if (last) {
                 const grade = String(last.gradeKumon).toUpperCase();
                 
+                // Risco: <80, REPETIR, ou ALERTA
                 if (grade.includes('<80') || grade.includes('REPETIR') || grade.includes('ALERTA') || parseInt(grade) < 80) {
                     riskStudents.push(s); riskCount++;
-                } else if (grade.includes('100') || grade.includes('ELOGIO') || parseInt(grade) >= 95) {
+                } 
+                // Destaque: 100% ou ELOGIO
+                else if (grade.includes('100') || grade.includes('ELOGIO') || parseInt(grade) >= 95) {
                     starStudents.push(s);
                 }
             }
@@ -580,7 +588,6 @@ const App = {
         const s = this.state.students[this.state.currentStudentId];
         
         if (s[type]) {
-            // Garante que a comparação funcione mesmo que um ID seja número e o outro string do HTML
             s[type] = s[type].filter(x => String(x.id) !== String(id));
         }
 
@@ -625,7 +632,6 @@ const App = {
         await this.saveBrainData(brain);
     },
 
-    // RESTAURAÇÃO COMPLETA DA FUNÇÃO RESET
     promptForReset() { 
         const code = prompt('Senha Admin (*177: Cérebro | RESET: Apagar Tudo):');
         if(code === '*177') this.elements.brainModal.classList.remove('hidden'); 
@@ -714,12 +720,12 @@ const App = {
             const t = await this.callGeminiAPI("Transcreva este áudio fielmente.", "Transcreva.", b64, this.state.audioFile.type); 
             const transcript = t.replace(/```json|```/g, '');
             
-            // Validação de Contexto
+            // Validação de Contexto (Filtro de Verdade)
             const validationPrompt = `Analise este texto: "${transcript}". É sobre uma reunião de pais, alunos ou educação Kumon? Responda APENAS JSON: {"valid": boolean, "reason": "..."}`;
             const validationRes = JSON.parse(await this.callGeminiAPI("Validador de Contexto", validationPrompt));
             
             if (!validationRes.valid) {
-                this.elements.transcriptionOutput.value = `Erro: Áudio não é sobre contexto Kumon/Educacional. Motivo: ${validationRes.reason}`;
+                this.elements.transcriptionOutput.value = `Erro: Conteúdo inválido. Motivo: ${validationRes.reason}`;
                 return;
             }
 
@@ -731,7 +737,6 @@ const App = {
         const t = this.elements.transcriptionOutput.value; const s = this.state.students[this.elements.meetingStudentSelect.value];
         this.elements.reportSection.classList.remove('hidden'); this.elements.reportContent.textContent = "Gerando...";
         try { 
-            // Adicionamos ID para garantir que o item seja apagável
             const analysisEntry = JSON.parse(await this.callGeminiAPI("JSON {resumo_executivo}", `Analise: ${t}. Aluno: ${s.name}`));
             analysisEntry.id = String(Date.now()) + Math.random(); 
             
